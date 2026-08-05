@@ -11,10 +11,55 @@ function getEditorForButton(btn) {
   return null;
 }
 
+function updateButtonState(btn, cellId, isPlaying) {
+  btn.classList.add('state-transitioning');
+  
+  setTimeout(() => {
+    if (isPlaying) {
+      btn.textContent = '⏸ Pause';
+      btn.classList.add('playing');
+      playingStates.set(cellId, true);
+      
+      btn.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(0.95)' },
+        { transform: 'scale(1)' }
+      ], {
+        duration: 160,
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    } else {
+      btn.textContent = '▶ Play';
+      btn.classList.remove('playing');
+      playingStates.set(cellId, false);
+    }
+    
+    btn.classList.remove('state-transitioning');
+  }, 100);
+}
+
 function initCellControls() {
   document.querySelectorAll('.play-btn').forEach(btn => {
     const cellId = btn.getAttribute('data-cell');
     const editor = getEditorForButton(btn);
+    
+    if (editor) {
+      const checkEditorReady = setInterval(() => {
+        if (editor.editor && editor.editor.scheduler) {
+          clearInterval(checkEditorReady);
+          
+          editor.editor.scheduler.on('started', () => {
+            updateButtonState(btn, cellId, true);
+          });
+          
+          editor.editor.scheduler.on('stopped', () => {
+            updateButtonState(btn, cellId, false);
+          });
+        }
+      }, 100);
+      
+      setTimeout(() => clearInterval(checkEditorReady), 5000);
+    }
     
     btn.addEventListener('click', () => {
       if (editor && editor.editor) {
@@ -24,30 +69,12 @@ function initCellControls() {
           if (typeof editor.editor.stop === 'function') {
             editor.editor.stop();
           }
-          btn.classList.remove('playing');
-          playingStates.set(cellId, false);
+          updateButtonState(btn, cellId, false);
         } else {
           if (typeof editor.editor.evaluate === 'function') {
             editor.editor.evaluate();
           }
-          btn.classList.add('playing');
-          playingStates.set(cellId, true);
-        }
-      }
-    });
-  });
-
-  document.querySelectorAll('.stop-btn').forEach(btn => {
-    const cellId = btn.getAttribute('data-cell');
-    const editor = getEditorForButton(btn);
-    const playBtn = btn.previousElementSibling;
-    
-    btn.addEventListener('click', () => {
-      if (editor && editor.editor && typeof editor.editor.stop === 'function') {
-        editor.editor.stop();
-        if (playBtn && playBtn.classList.contains('play-btn')) {
-          playBtn.classList.remove('playing');
-          playingStates.set(cellId, false);
+          updateButtonState(btn, cellId, true);
         }
       }
     });
@@ -62,7 +89,8 @@ function stopAllSounds() {
   });
   
   document.querySelectorAll('.play-btn').forEach(btn => {
-    btn.classList.remove('playing');
+    const cellId = btn.getAttribute('data-cell');
+    updateButtonState(btn, cellId, false);
   });
   
   playingStates.clear();
@@ -95,14 +123,10 @@ function setupKeyboardShortcuts() {
               if (typeof focusedEditor.editor.stop === 'function') {
                 focusedEditor.editor.stop();
               }
-              playBtn?.classList.remove('playing');
-              playingStates.set(cellId, false);
             } else {
               if (typeof focusedEditor.editor.evaluate === 'function') {
                 focusedEditor.editor.evaluate();
               }
-              playBtn?.classList.add('playing');
-              playingStates.set(cellId, true);
             }
           }
         }
@@ -114,13 +138,8 @@ function setupKeyboardShortcuts() {
       if (focusedEditor) {
         const cell = focusedEditor.closest('.cell');
         if (cell) {
-          const playBtn = cell.querySelector('.play-btn');
-          const cellId = playBtn?.getAttribute('data-cell');
-          
           if (focusedEditor.editor && typeof focusedEditor.editor.stop === 'function') {
             focusedEditor.editor.stop();
-            playBtn?.classList.remove('playing');
-            playingStates.set(cellId, false);
           }
         }
       }
@@ -133,9 +152,13 @@ function setupScrollBehavior() {
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.toc a');
   
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
   let scrollTimeout;
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
+  let rafId;
+  
+  const updateScrollState = () => {
+    if (window.scrollY > 10) {
       header.classList.add('scrolled');
     } else {
       header.classList.remove('scrolled');
@@ -147,20 +170,30 @@ function setupScrollBehavior() {
       
       sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
         if (window.scrollY >= sectionTop - 200) {
           current = section.getAttribute('id');
         }
       });
       
       navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
+        const wasActive = link.classList.contains('active');
+        const shouldBeActive = link.getAttribute('href') === `#${current}`;
+        
+        if (shouldBeActive && !wasActive) {
           link.classList.add('active');
+        } else if (!shouldBeActive && wasActive) {
+          link.classList.remove('active');
         }
       });
-    }, 100);
-  });
+    }, 50);
+  };
+  
+  window.addEventListener('scroll', () => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = requestAnimationFrame(updateScrollState);
+  }, { passive: true });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -169,12 +202,24 @@ document.addEventListener('DOMContentLoaded', () => {
     stopAllBtn.addEventListener('click', stopAllSounds);
   }
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
   document.querySelectorAll('.toc a').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const header = document.getElementById('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+        const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+        const viewportCenter = window.innerHeight / 2;
+        const targetCenter = target.offsetHeight / 2;
+        const offsetPosition = targetPosition - viewportCenter + targetCenter;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: prefersReducedMotion ? 'auto' : 'smooth'
+        });
       }
     });
   });
