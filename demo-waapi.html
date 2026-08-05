@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WAAPI Demo - Web Animations API Examples</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #050505;
+      color: #e8e8e8;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #c3e88d;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      color: #c792ea;
+    }
+
+    .demo-section {
+      background: #0f0f0f;
+      border: 1px solid #303030;
+      border-left: 3px solid #c3e88d;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .demo-area {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    .demo-box {
+      width: 100px;
+      height: 100px;
+      background: #c792ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #050505;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button {
+      background: #c3e88d;
+      color: #050505;
+      border: 1px solid #c3e88d;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    button:hover {
+      background: #aed177;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    pre {
+      background: #1a1a1a;
+      border: 1px solid #303030;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    code {
+      color: #c3e88d;
+      font-family: 'Courier New', monospace;
+    }
+
+    .explanation {
+      color: #b0b0b0;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Web Animations API (WAAPI) Demonstrations</h1>
+    <p class="explanation">
+      The Web Animations API provides JavaScript control over CSS animations with hardware acceleration.
+      These examples show how to use WAAPI instead of CSS keyframes or JavaScript libraries.
+    </p>
+
+    <div class="demo-section">
+      <h2>1. Basic Scale Animation (Button Press Feedback)</h2>
+      <div class="demo-area">
+        <div class="demo-box" id="box1">Click Me</div>
+        <button onclick="animateScale()">Trigger via Button</button>
+      </div>
+      <pre><code>element.animate([
+  { transform: 'scale(1)' },
+  { transform: 'scale(0.95)' },
+  { transform: 'scale(1)' }
+], {
+  duration: 160,
+  easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+});</code></pre>
+      <p class="explanation">Hardware-accelerated scale animation using strong ease-out curve. Perfect for button press feedback.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>2. Fade In with Scale (Cell Entry)</h2>
+      <div class="demo-area">
+        <button onclick="animateFadeIn()">Fade In</button>
+      </div>
+      <div id="fadeBox" style="opacity: 0; transform: translateY(12px);">
+        <div class="demo-box">I fade in!</div>
+      </div>
+      <pre><code>element.animate([
+  { opacity: 0, transform: 'translateY(12px)' },
+  { opacity: 1, transform: 'translateY(0)' }
+], {
+  duration: 400,
+  fill: 'forwards',
+  easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+});</code></pre>
+      <p class="explanation">Using <code>fill: 'forwards'</code> to persist the final state. Good for entry animations.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>3. Sequential Stagger Animation</h2>
+      <div class="demo-area">
+        <button onclick="animateStagger()">Stagger Multiple</button>
+      </div>
+      <div id="staggerContainer" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div class="demo-box" style="width: 60px; height: 60px; opacity: 0;">1</div>
+        <div class="demo-box" style="width: 60px; height: 60px; opacity: 0;">2</div>
+        <div class="demo-box" style="width: 60px; height: 60px; opacity: 0;">3</div>
+        <div class="demo-box" style="width: 60px; height: 60px; opacity: 0;">4</div>
+        <div class="demo-box" style="width: 60px; height: 60px; opacity: 0;">5</div>
+      </div>
+      <pre><code>const items = document.querySelectorAll('.item');
+items.forEach((item, index) => {
+  item.animate([
+    { opacity: 0, transform: 'translateY(8px)' },
+    { opacity: 1, transform: 'translateY(0)' }
+  ], {
+    duration: 300,
+    delay: index * 60,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+  });
+});</code></pre>
+      <p class="explanation">Stagger animations by applying incremental delays. Each element animates 60ms after the previous.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>4. Clip-Path Reveal Animation</h2>
+      <div class="demo-area">
+        <button onclick="animateClipPath()">Reveal with Clip-Path</button>
+      </div>
+      <div id="clipBox" style="clip-path: inset(0 0 100% 0);">
+        <div class="demo-box" style="width: 200px;">Revealed from bottom</div>
+      </div>
+      <pre><code>element.animate([
+  { clipPath: 'inset(0 0 100% 0)' },
+  { clipPath: 'inset(0 0 0 0)' }
+], {
+  duration: 600,
+  fill: 'forwards',
+  easing: 'cubic-bezier(0.77, 0, 0.175, 1)'
+});</code></pre>
+      <p class="explanation">Using clip-path for reveals. The inset values: top, right, bottom, left. This "eats" from bottom (100%) to nothing (0%).</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>5. Interruptible Animation</h2>
+      <div class="demo-area">
+        <div class="demo-box" id="interruptBox">Hover Me</div>
+      </div>
+      <pre><code>let currentAnimation = null;
+
+element.addEventListener('mouseenter', () => {
+  if (currentAnimation) currentAnimation.cancel();
+  currentAnimation = element.animate([
+    { transform: 'scale(1.2)' }
+  ], {
+    duration: 200,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+  });
+});
+
+element.addEventListener('mouseleave', () => {
+  if (currentAnimation) currentAnimation.cancel();
+  currentAnimation = element.animate([
+    { transform: 'scale(1)' }
+  ], {
+    duration: 200,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+  });
+});</code></pre>
+      <p class="explanation">Canceling previous animations before starting new ones. This prevents animation conflicts and feels smooth.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>6. Blur Transition (State Change)</h2>
+      <div class="demo-area">
+        <button onclick="animateBlurTransition()">Change State with Blur</button>
+      </div>
+      <div class="demo-box" id="blurBox">State A</div>
+      <pre><code>// Blur out
+element.animate([
+  { filter: 'blur(0px)', opacity: 1 },
+  { filter: 'blur(4px)', opacity: 0.7 }
+], {
+  duration: 100,
+  fill: 'forwards',
+  easing: 'ease'
+});
+
+// Change content, then blur in
+setTimeout(() => {
+  element.textContent = 'State B';
+  element.animate([
+    { filter: 'blur(4px)', opacity: 0.7 },
+    { filter: 'blur(0px)', opacity: 1 }
+  ], {
+    duration: 100,
+    fill: 'forwards',
+    easing: 'ease'
+  });
+}, 100);</code></pre>
+      <p class="explanation">Using blur to mask imperfect transitions. Blur bridges the visual gap between two states.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>7. Multiple Properties (Nav Indicator)</h2>
+      <div class="demo-area">
+        <button onclick="animateIndicator()">Slide Indicator</button>
+      </div>
+      <div style="position: relative; width: 200px; height: 40px; background: #1a1a1a;">
+        <div id="indicator" style="position: absolute; bottom: 0; left: 0; width: 50px; height: 3px; background: #c3e88d; transform: scaleX(0); transform-origin: left;"></div>
+      </div>
+      <pre><code>element.animate([
+  { transform: 'scaleX(0) translateX(0)' },
+  { transform: 'scaleX(1) translateX(0)' }
+], {
+  duration: 180,
+  fill: 'forwards',
+  easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+});</code></pre>
+      <p class="explanation">Combining multiple transform values in a single property. Better performance than animating separately.</p>
+    </div>
+
+    <h2 style="margin-top: 3rem;">Key Advantages of WAAPI</h2>
+    <ul style="margin-left: 2rem; color: #b0b0b0;">
+      <li><strong>Hardware-accelerated</strong>: Runs on GPU, same as CSS animations</li>
+      <li><strong>JavaScript control</strong>: Can cancel, reverse, pause, or speed up mid-animation</li>
+      <li><strong>No CSS keyframes needed</strong>: Keep animation logic in JS when appropriate</li>
+      <li><strong>No library required</strong>: Native browser API with excellent support</li>
+      <li><strong>Better than RAF loops</strong>: Automatic optimization and throttling</li>
+      <li><strong>Interruptible</strong>: Call <code>.cancel()</code> to stop and start new animations smoothly</li>
+    </ul>
+  </div>
+
+  <script>
+    function animateScale() {
+      const box = document.getElementById('box1');
+      box.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(0.95)' },
+        { transform: 'scale(1)' }
+      ], {
+        duration: 160,
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    }
+
+    document.getElementById('box1').addEventListener('click', animateScale);
+
+    function animateFadeIn() {
+      const box = document.getElementById('fadeBox');
+      box.animate([
+        { opacity: 0, transform: 'translateY(12px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], {
+        duration: 400,
+        fill: 'forwards',
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    }
+
+    function animateStagger() {
+      const items = document.querySelectorAll('#staggerContainer .demo-box');
+      items.forEach((item, index) => {
+        item.animate([
+          { opacity: 0, transform: 'translateY(8px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], {
+          duration: 300,
+          delay: index * 60,
+          fill: 'forwards',
+          easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+        });
+      });
+    }
+
+    function animateClipPath() {
+      const box = document.getElementById('clipBox');
+      box.animate([
+        { clipPath: 'inset(0 0 100% 0)' },
+        { clipPath: 'inset(0 0 0 0)' }
+      ], {
+        duration: 600,
+        fill: 'forwards',
+        easing: 'cubic-bezier(0.77, 0, 0.175, 1)'
+      });
+    }
+
+    let currentAnimation = null;
+    const interruptBox = document.getElementById('interruptBox');
+    
+    interruptBox.addEventListener('mouseenter', () => {
+      if (currentAnimation) currentAnimation.cancel();
+      currentAnimation = interruptBox.animate([
+        { transform: 'scale(1.2)' }
+      ], {
+        duration: 200,
+        fill: 'forwards',
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    });
+
+    interruptBox.addEventListener('mouseleave', () => {
+      if (currentAnimation) currentAnimation.cancel();
+      currentAnimation = interruptBox.animate([
+        { transform: 'scale(1)' }
+      ], {
+        duration: 200,
+        fill: 'forwards',
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    });
+
+    let stateToggle = true;
+    function animateBlurTransition() {
+      const box = document.getElementById('blurBox');
+      
+      box.animate([
+        { filter: 'blur(0px)', opacity: 1 },
+        { filter: 'blur(4px)', opacity: 0.7 }
+      ], {
+        duration: 100,
+        fill: 'forwards',
+        easing: 'ease'
+      });
+
+      setTimeout(() => {
+        box.textContent = stateToggle ? 'State B' : 'State A';
+        stateToggle = !stateToggle;
+        
+        box.animate([
+          { filter: 'blur(4px)', opacity: 0.7 },
+          { filter: 'blur(0px)', opacity: 1 }
+        ], {
+          duration: 100,
+          fill: 'forwards',
+          easing: 'ease'
+        });
+      }, 100);
+    }
+
+    function animateIndicator() {
+      const indicator = document.getElementById('indicator');
+      const randomX = Math.random() * 150;
+      
+      indicator.animate([
+        { transform: `scaleX(1) translateX(${randomX}px)` }
+      ], {
+        duration: 180,
+        fill: 'forwards',
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+      });
+    }
+  </script>
+</body>
+</html>
