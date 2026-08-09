@@ -13,12 +13,12 @@ function getEditorForButton(btn) {
 
 function updateButtonState(btn, cellId, isPlaying) {
   console.log('updateButtonState called:', cellId, isPlaying);
-  
+
   if (isPlaying) {
     btn.textContent = '⏸ Pause';
     btn.classList.add('playing');
     playingStates.set(cellId, true);
-    
+
     btn.animate([
       { transform: 'scale(1)' },
       { transform: 'scale(0.95)' },
@@ -38,35 +38,35 @@ function initCellControls() {
   document.querySelectorAll('.play-btn').forEach(btn => {
     const cellId = btn.getAttribute('data-cell');
     const editor = getEditorForButton(btn);
-    
+
     playingStates.set(cellId, false);
-    
+
     if (editor) {
       const checkEditorReady = setInterval(() => {
         if (editor.editor && editor.editor.scheduler) {
           clearInterval(checkEditorReady);
-          
+
           editor.editor.scheduler.on('started', () => {
             console.log('Scheduler started event for cell:', cellId);
             updateButtonState(btn, cellId, true);
           });
-          
+
           editor.editor.scheduler.on('stopped', () => {
             console.log('Scheduler stopped event for cell:', cellId);
             updateButtonState(btn, cellId, false);
           });
         }
       }, 100);
-      
+
       setTimeout(() => clearInterval(checkEditorReady), 5000);
     }
-    
+
     btn.addEventListener('click', () => {
       if (editor && editor.editor) {
         const isPlaying = playingStates.get(cellId);
-        
+
         console.log('Button clicked. Cell:', cellId, 'Currently playing:', isPlaying);
-        
+
         if (isPlaying) {
           if (typeof editor.editor.stop === 'function') {
             editor.editor.stop();
@@ -89,12 +89,12 @@ function stopAllSounds() {
       el.editor.stop();
     }
   });
-  
+
   document.querySelectorAll('.play-btn').forEach(btn => {
     const cellId = btn.getAttribute('data-cell');
     updateButtonState(btn, cellId, false);
   });
-  
+
   playingStates.clear();
 }
 
@@ -102,15 +102,15 @@ function setupKeyboardShortcuts() {
   setTimeout(() => {
     document.querySelectorAll('strudel-editor').forEach(editor => {
       console.log('Setting up keyboard shortcuts for editor');
-      
+
       let isEditorFocused = false;
-      
+
       editor.addEventListener('focusin', () => {
         focusedEditor = editor;
         isEditorFocused = true;
         console.log('Editor focused');
       });
-      
+
       editor.addEventListener('focusout', () => {
         if (focusedEditor === editor) {
           focusedEditor = null;
@@ -118,47 +118,47 @@ function setupKeyboardShortcuts() {
         isEditorFocused = false;
         console.log('Editor unfocused');
       });
-      
+
       editor.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
           console.log('!!! Ctrl+Enter detected !!!');
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
-          
+
           const cell = editor.closest('.cell');
-          
+
           if (cell && editor.editor) {
             const playBtn = cell.querySelector('.play-btn');
             const cellId = playBtn?.getAttribute('data-cell');
-            
+
             console.log('Playing cell:', cellId);
-            
+
             if (typeof editor.editor.evaluate === 'function') {
               console.log('>>> Calling evaluate() <<<');
               editor.editor.evaluate();
             }
-            
+
             if (playBtn && cellId) {
               updateButtonState(playBtn, cellId, true);
             }
           }
           return false;
         }
-        
+
         if (e.ctrlKey && e.key === '.') {
           console.log('!!! Ctrl+. detected !!!');
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
-          
+
           const cell = editor.closest('.cell');
           if (cell && editor.editor) {
             const playBtn = cell.querySelector('.play-btn');
             const cellId = playBtn?.getAttribute('data-cell');
-            
+
             console.log('Stopping cell:', cellId);
-            
+
             if (typeof editor.editor.stop === 'function') {
               editor.editor.stop();
             }
@@ -177,34 +177,34 @@ function setupScrollBehavior() {
   const header = document.getElementById('header');
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.toc a');
-  
+
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
+
   let scrollTimeout;
   let rafId;
-  
+
   const updateScrollState = () => {
     if (window.scrollY > 10) {
       header.classList.add('scrolled');
     } else {
       header.classList.remove('scrolled');
     }
-    
+
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
       let current = '';
-      
+
       sections.forEach(section => {
         const sectionTop = section.offsetTop;
         if (window.scrollY >= sectionTop - 200) {
           current = section.getAttribute('id');
         }
       });
-      
+
       navLinks.forEach(link => {
         const wasActive = link.classList.contains('active');
         const shouldBeActive = link.getAttribute('href') === `#${current}`;
-        
+
         if (shouldBeActive && !wasActive) {
           link.classList.add('active');
         } else if (!shouldBeActive && wasActive) {
@@ -213,7 +213,7 @@ function setupScrollBehavior() {
       });
     }, 50);
   };
-  
+
   window.addEventListener('scroll', () => {
     if (rafId) {
       cancelAnimationFrame(rafId);
@@ -229,38 +229,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
+
   document.querySelectorAll('.toc a').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
-        const header = document.getElementById('header');
-        const isScrolled = header.classList.contains('scrolled');
-        const headerHeight = header ? header.offsetHeight : 0;
-        
-        const targetPosition = target.getBoundingClientRect().top + window.scrollY;
-        const viewportCenter = window.innerHeight / 2;
-        const targetCenter = target.offsetHeight / 2;
-        
-        let offsetPosition = targetPosition - viewportCenter + targetCenter;
-        
-        if (!isScrolled) {
-          const expandedHeaderOffset = headerHeight * 0.5;
-          offsetPosition -= expandedHeaderOffset;
+        if (link.getAttribute('href') === '#demo') {
+          const header = document.getElementById('header');
+          header.classList.add('scrolled');
+          const headerHeight = header.offsetHeight;
+
+          const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = targetPosition - headerHeight - 16;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: prefersReducedMotion ? 'auto' : 'smooth'
+          });
+        } else {
+          const header = document.getElementById('header');
+          const isScrolled = header.classList.contains('scrolled');
+          const headerHeight = header ? header.offsetHeight : 0;
+
+          const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+          const viewportCenter = window.innerHeight / 2;
+          const targetCenter = target.offsetHeight / 2;
+
+          let offsetPosition = targetPosition - viewportCenter + targetCenter;
+
+          if (!isScrolled) {
+            const expandedHeaderOffset = headerHeight * 0.5;
+            offsetPosition -= expandedHeaderOffset;
+          }
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: prefersReducedMotion ? 'auto' : 'smooth'
+          });
         }
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: prefersReducedMotion ? 'auto' : 'smooth'
-        });
       }
     });
   });
+}
+);
 
-  setTimeout(() => {
-    initCellControls();
-    setupKeyboardShortcuts();
-    setupScrollBehavior();
-  }, 1000);
-});
+setTimeout(() => {
+  initCellControls();
+  setupKeyboardShortcuts();
+  setupScrollBehavior();
+}, 1000);

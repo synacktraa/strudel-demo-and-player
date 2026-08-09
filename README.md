@@ -7,7 +7,6 @@ An interactive web-based notebook for teaching live-coding music with Strudel. E
 This notebook provides a hands-on learning experience for Strudel, a live-coding pattern language for making music. It includes:
 
 - 6 lesson cells covering rhythm, repetition, melody, instruments, layering, and effects
-- A mini challenge to combine all concepts
 - A blank cell for free exploration
 - Independent playback for each cell (play multiple at once to layer sounds)
 - A global "Stop All Sounds" panic button
