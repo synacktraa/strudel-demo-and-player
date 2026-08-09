@@ -236,9 +236,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
         if (link.getAttribute('href') === '#demo') {
-          target.scrollIntoView({
-            behavior: prefersReducedMotion ? 'auto' : 'smooth',
-            block: 'start'
+          const header = document.getElementById('header');
+          header.classList.add('scrolled');
+          const headerHeight = header.offsetHeight;
+
+          const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = targetPosition - headerHeight - 16;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: prefersReducedMotion ? 'auto' : 'smooth'
           });
         } else {
           const header = document.getElementById('header');
