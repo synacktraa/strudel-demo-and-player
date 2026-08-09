@@ -12,30 +12,26 @@ function getEditorForButton(btn) {
 }
 
 function updateButtonState(btn, cellId, isPlaying) {
-  btn.classList.add('state-transitioning');
+  console.log('updateButtonState called:', cellId, isPlaying);
   
-  setTimeout(() => {
-    if (isPlaying) {
-      btn.textContent = '⏸ Pause';
-      btn.classList.add('playing');
-      playingStates.set(cellId, true);
-      
-      btn.animate([
-        { transform: 'scale(1)' },
-        { transform: 'scale(0.95)' },
-        { transform: 'scale(1)' }
-      ], {
-        duration: 160,
-        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
-      });
-    } else {
-      btn.textContent = '▶ Play';
-      btn.classList.remove('playing');
-      playingStates.set(cellId, false);
-    }
+  if (isPlaying) {
+    btn.textContent = '⏸ Pause';
+    btn.classList.add('playing');
+    playingStates.set(cellId, true);
     
-    btn.classList.remove('state-transitioning');
-  }, 100);
+    btn.animate([
+      { transform: 'scale(1)' },
+      { transform: 'scale(0.95)' },
+      { transform: 'scale(1)' }
+    ], {
+      duration: 160,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
+    });
+  } else {
+    btn.textContent = '▶ Play';
+    btn.classList.remove('playing');
+    playingStates.set(cellId, false);
+  }
 }
 
 function initCellControls() {
@@ -43,16 +39,20 @@ function initCellControls() {
     const cellId = btn.getAttribute('data-cell');
     const editor = getEditorForButton(btn);
     
+    playingStates.set(cellId, false);
+    
     if (editor) {
       const checkEditorReady = setInterval(() => {
         if (editor.editor && editor.editor.scheduler) {
           clearInterval(checkEditorReady);
           
           editor.editor.scheduler.on('started', () => {
+            console.log('Scheduler started event for cell:', cellId);
             updateButtonState(btn, cellId, true);
           });
           
           editor.editor.scheduler.on('stopped', () => {
+            console.log('Scheduler stopped event for cell:', cellId);
             updateButtonState(btn, cellId, false);
           });
         }
@@ -64,6 +64,8 @@ function initCellControls() {
     btn.addEventListener('click', () => {
       if (editor && editor.editor) {
         const isPlaying = playingStates.get(cellId);
+        
+        console.log('Button clicked. Cell:', cellId, 'Currently playing:', isPlaying);
         
         if (isPlaying) {
           if (typeof editor.editor.stop === 'function') {
@@ -97,54 +99,78 @@ function stopAllSounds() {
 }
 
 function setupKeyboardShortcuts() {
-  document.querySelectorAll('strudel-editor').forEach(editor => {
-    editor.addEventListener('focusin', () => {
-      focusedEditor = editor;
-    });
-    editor.addEventListener('focusout', () => {
-      if (focusedEditor === editor) {
-        focusedEditor = null;
-      }
-    });
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'Enter') {
-      e.preventDefault();
-      if (focusedEditor) {
-        const cell = focusedEditor.closest('.cell');
-        if (cell) {
-          const playBtn = cell.querySelector('.play-btn');
-          const cellId = playBtn?.getAttribute('data-cell');
-          const isPlaying = playingStates.get(cellId);
+  setTimeout(() => {
+    document.querySelectorAll('strudel-editor').forEach(editor => {
+      console.log('Setting up keyboard shortcuts for editor');
+      
+      let isEditorFocused = false;
+      
+      editor.addEventListener('focusin', () => {
+        focusedEditor = editor;
+        isEditorFocused = true;
+        console.log('Editor focused');
+      });
+      
+      editor.addEventListener('focusout', () => {
+        if (focusedEditor === editor) {
+          focusedEditor = null;
+        }
+        isEditorFocused = false;
+        console.log('Editor unfocused');
+      });
+      
+      editor.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+          console.log('!!! Ctrl+Enter detected !!!');
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
           
-          if (focusedEditor.editor) {
-            if (isPlaying) {
-              if (typeof focusedEditor.editor.stop === 'function') {
-                focusedEditor.editor.stop();
-              }
-            } else {
-              if (typeof focusedEditor.editor.evaluate === 'function') {
-                focusedEditor.editor.evaluate();
-              }
+          const cell = editor.closest('.cell');
+          
+          if (cell && editor.editor) {
+            const playBtn = cell.querySelector('.play-btn');
+            const cellId = playBtn?.getAttribute('data-cell');
+            
+            console.log('Playing cell:', cellId);
+            
+            if (typeof editor.editor.evaluate === 'function') {
+              console.log('>>> Calling evaluate() <<<');
+              editor.editor.evaluate();
+            }
+            
+            if (playBtn && cellId) {
+              updateButtonState(playBtn, cellId, true);
             }
           }
+          return false;
         }
-      }
-    }
-    
-    if (e.ctrlKey && e.key === '.') {
-      e.preventDefault();
-      if (focusedEditor) {
-        const cell = focusedEditor.closest('.cell');
-        if (cell) {
-          if (focusedEditor.editor && typeof focusedEditor.editor.stop === 'function') {
-            focusedEditor.editor.stop();
+        
+        if (e.ctrlKey && e.key === '.') {
+          console.log('!!! Ctrl+. detected !!!');
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          
+          const cell = editor.closest('.cell');
+          if (cell && editor.editor) {
+            const playBtn = cell.querySelector('.play-btn');
+            const cellId = playBtn?.getAttribute('data-cell');
+            
+            console.log('Stopping cell:', cellId);
+            
+            if (typeof editor.editor.stop === 'function') {
+              editor.editor.stop();
+            }
+            if (playBtn && cellId) {
+              updateButtonState(playBtn, cellId, false);
+            }
           }
+          return false;
         }
-      }
-    }
-  });
+      }, true);
+    });
+  }, 2000);
 }
 
 function setupScrollBehavior() {
@@ -210,11 +236,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
         const header = document.getElementById('header');
+        const isScrolled = header.classList.contains('scrolled');
         const headerHeight = header ? header.offsetHeight : 0;
+        
         const targetPosition = target.getBoundingClientRect().top + window.scrollY;
         const viewportCenter = window.innerHeight / 2;
         const targetCenter = target.offsetHeight / 2;
-        const offsetPosition = targetPosition - viewportCenter + targetCenter;
+        
+        let offsetPosition = targetPosition - viewportCenter + targetCenter;
+        
+        if (!isScrolled) {
+          const expandedHeaderOffset = headerHeight * 0.5;
+          offsetPosition -= expandedHeaderOffset;
+        }
         
         window.scrollTo({
           top: offsetPosition,
