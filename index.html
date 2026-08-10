@@ -54,7 +54,7 @@
       <div class="cell-header">
         <h3>What Strudel Can Do</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="demo">▶ Play</button>
+          <button class="play-btn" data-cell="demo"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Listen to what's possible with Strudel.</strong> This example showcases layered drums, bass, chords, and effects working together.</p>
@@ -94,7 +94,10 @@ stack(
       <div class="cell-header">
         <h3>Cell 1: Basic Rhythm</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="1">▶ Play</button>
+          <button class="play-btn" data-cell="1"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="info-btn" id="info-btn" aria-label="Info">
+            <i class="fa-solid fa-circle-info"></i>
+          </button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Create simple drum patterns using sound samples</p>
@@ -114,7 +117,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 2: Pattern Repetition</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="2">▶ Play</button>
+          <button class="play-btn" data-cell="2"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Use <code>*</code> to repeat sounds and create more complex rhythms</p>
@@ -134,7 +137,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 3: Melody</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="3">▶ Play</button>
+          <button class="play-btn" data-cell="3"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Create melodic patterns using notes</p>
@@ -154,7 +157,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 4: Instruments & Sounds</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="4">▶ Play</button>
+          <button class="play-btn" data-cell="4"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Explore different instrument sounds</p>
@@ -174,7 +177,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 5: Layering</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="5">▶ Play</button>
+          <button class="play-btn" data-cell="5"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Combine multiple patterns using <code>stack()</code></p>
@@ -194,7 +197,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 6: Effects</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="6">▶ Play</button>
+          <button class="play-btn" data-cell="6"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Add audio effects to shape your sound</p>
@@ -214,7 +217,7 @@ stack(
       <div class="cell-header">
         <h3>Build Your Own</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="build">▶ Play</button>
+          <button class="play-btn" data-cell="build"><i class="fa-solid fa-play"></i> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Create something from scratch!</strong> Use everything you've learned to compose your own pattern.</p>
@@ -239,6 +242,17 @@ stack(
     </section>
   </main>
 
+  <div id="info-modal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img src="image.png" alt="Drum Kit Guide" class="modal-image">
+    </div>
+  </div>
+
+  <script src="https://kit.fontawesome.com/c6a35e66f0.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@strudel/repl@1"></script>
   <script src="app.js"></script>
 </body>
