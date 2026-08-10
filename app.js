@@ -15,7 +15,7 @@ function updateButtonState(btn, cellId, isPlaying) {
   console.log('updateButtonState called:', cellId, isPlaying);
 
   if (isPlaying) {
-    btn.textContent = '⏸ Pause';
+    btn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
     btn.classList.add('playing');
     playingStates.set(cellId, true);
 
@@ -28,7 +28,7 @@ function updateButtonState(btn, cellId, isPlaying) {
       easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
     });
   } else {
-    btn.textContent = '▶ Play';
+    btn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
     btn.classList.remove('playing');
     playingStates.set(cellId, false);
   }
@@ -222,6 +222,39 @@ function setupScrollBehavior() {
   }, { passive: true });
 }
 
+function setupInfoModal() {
+  const infoBtn = document.getElementById('info-btn');
+  const modal = document.getElementById('info-modal');
+  const modalClose = document.getElementById('modal-close');
+  const modalOverlay = modal?.querySelector('.modal-overlay');
+
+  if (infoBtn && modal) {
+    infoBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+
+    const closeModal = () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+
+    if (modalClose) {
+      modalClose.addEventListener('click', closeModal);
+    }
+
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', closeModal);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const stopAllBtn = document.getElementById('stop-all');
   if (stopAllBtn) {
@@ -278,4 +311,5 @@ setTimeout(() => {
   initCellControls();
   setupKeyboardShortcuts();
   setupScrollBehavior();
+  setupInfoModal();
 }, 1000);
