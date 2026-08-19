@@ -107,7 +107,7 @@ function stopAllSounds() {
 }
 
 function setupKeyboardShortcuts() {
-  setTimeout(() => {
+  {
     document.querySelectorAll('strudel-editor').forEach(editor => {
       console.log('Setting up keyboard shortcuts for editor');
 
@@ -178,7 +178,7 @@ function setupKeyboardShortcuts() {
         }
       }, true);
     });
-  }, 2000);
+  }
 }
 
 function setupScrollBehavior() {
@@ -315,9 +315,22 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 );
 
-setTimeout(() => {
+// Wire the UI as soon as the markup exists rather than after an arbitrary delay.
+// None of these need the Strudel editors to have finished booting - the click
+// and keyboard handlers check for `editor.editor` when they actually fire - and
+// waiting a second left a dead zone where pressing Play did nothing.
+function initNotebook() {
   initCellControls();
   setupKeyboardShortcuts();
   setupScrollBehavior();
   setupInfoModal();
-}, 1000);
+
+  // Lets the E2E suite wait for a real signal instead of sleeping.
+  document.body.dataset.notebookReady = 'true';
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNotebook);
+} else {
+  initNotebook();
+}
