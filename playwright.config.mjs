@@ -31,7 +31,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'node server.mjs --port=8199',
+    command: 'node app/server.mjs --port=8199 --no-open',
     url: 'http://127.0.0.1:8199',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',

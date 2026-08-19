@@ -7,7 +7,7 @@ import {
   rewriteSampleMap,
   collectSampleFiles,
   pruneBanks,
-} from '../../scripts/lib/rewrite.mjs';
+} from '../../setup/lib/rewrite.mjs';
 
 test('REMOTE_BASES covers every remote host the Strudel bundle talks to', () => {
   const remotes = REMOTE_BASES.map((r) => r.remote);

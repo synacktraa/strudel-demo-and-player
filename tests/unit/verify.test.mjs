@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { checkVendor, checkPageHasNoRemoteRefs } from '../../scripts/lib/verify.mjs';
+import { checkVendor, checkPageHasNoRemoteRefs } from '../../setup/lib/verify.mjs';
 
 function makeVendor({ withManifest = true, withStrudel = true, patched = true, withMaps = true } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'vendor-'));

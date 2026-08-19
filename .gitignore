@@ -2,7 +2,7 @@ GUIDE.md
 *.log
 
 # Vendored offline assets - produced by `npm run setup`, never committed
-vendor/
+app/vendor/
 
 # Node / test tooling (only needed on the machine that prepares the workshop)
 node_modules/

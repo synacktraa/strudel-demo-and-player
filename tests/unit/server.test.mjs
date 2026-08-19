@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { contentTypeFor, resolveSafePath, createServer } from '../../server.mjs';
+import { contentTypeFor, resolveSafePath, createServer } from '../../app/server.mjs';
 
 test('contentTypeFor covers every file type the notebook serves', () => {
   assert.match(contentTypeFor('index.html'), /^text\/html/);

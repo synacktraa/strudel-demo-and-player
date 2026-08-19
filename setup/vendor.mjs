@@ -33,7 +33,8 @@ import {
 } from './lib/download.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const VENDOR = join(ROOT, 'vendor');
+const APP = join(ROOT, 'app');
+const VENDOR = join(APP, 'vendor');
 
 const args = process.argv.slice(2);
 const profileArg = args.find((a) => a.startsWith('--profile='))?.split('=')[1] ?? DEFAULT_PROFILE;
@@ -197,7 +198,7 @@ async function main() {
   }
   await mkdir(VENDOR, { recursive: true });
 
-  const html = await readFile(join(ROOT, 'index.html'), 'utf8');
+  const html = await readFile(join(APP, 'index.html'), 'utf8');
   const { soundfonts: requiredFonts, banks: notebookBanks } = extractSoundRequirements(html);
   console.log(
     `  Notebook needs ${requiredFonts.size} soundfont instrument(s) and ${notebookBanks.size} named bank(s).`,

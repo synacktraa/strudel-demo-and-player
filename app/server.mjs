@@ -7,7 +7,7 @@
  * fetching are all blocked on file:// URLs.
  */
 import { createServer as createHttpServer } from 'node:http';
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, sep } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -131,47 +131,84 @@ function openBrowser(url) {
   }
 }
 
-function listenOnFirstFreePort(server, host, ports) {
+/**
+ * Walk upward from the preferred port, then let the OS pick anything free.
+ * A classroom machine may well have something already on 8000, and the run
+ * command should never fail for that reason.
+ */
+function listenOnFreePort(server, host, preferred, attempts = 20) {
   return new Promise((resolve, reject) => {
-    const tryNext = (index) => {
-      if (index >= ports.length) {
-        return reject(new Error(`No free port found (tried ${ports.join(', ')})`));
-      }
-      server.once('error', (err) => {
-        if (err.code === 'EADDRINUSE') return tryNext(index + 1);
+    const tryPort = (port, remaining) => {
+      const onError = (err) => {
+        if (err.code === 'EADDRINUSE' || err.code === 'EACCES') {
+          // 0 asks the OS for any free port - it cannot itself be in use.
+          if (remaining <= 0) return tryPort(0, -1);
+          return tryPort(port + 1, remaining - 1);
+        }
         reject(err);
+      };
+      server.once('error', onError);
+      server.listen(port, host, () => {
+        server.removeListener('error', onError);
+        resolve(server.address().port);
       });
-      server.listen(ports[index], host, () => resolve(ports[index]));
     };
-    tryNext(0);
+    tryPort(preferred, attempts);
   });
+}
+
+/**
+ * Fail fast, and helpfully, when setup has not been run on this machine.
+ *
+ * Deliberately a light existence check rather than the thorough audit in
+ * `npm run verify` - it keeps app/ self-contained and portable, with no import
+ * reaching back into setup/.
+ */
+function findMissingAssets(root) {
+  const required = [
+    ['vendor/manifest.json', 'asset manifest'],
+    ['vendor/strudel/index.js', 'Strudel engine'],
+    ['vendor/samples/maps/uzu-drumkit/strudel.json', 'default drum kit'],
+  ];
+  return required.filter(([rel]) => !existsSync(join(root, ...rel.split('/')))).map(([rel, label]) => `${label} (${rel})`);
 }
 
 // Only run the CLI when executed directly, not when imported by tests.
 if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv[1])) {
   const args = process.argv.slice(2);
   const portArg = args.find((a) => a.startsWith('--port='));
-  const requested = portArg ? Number(portArg.split('=')[1]) : 8000;
-  const shouldOpen = args.includes('--open');
+  const preferred = portArg ? Number(portArg.split('=')[1]) : 8000;
+  const shouldOpen = !args.includes('--no-open');
+
+  const missing = findMissingAssets(PROJECT_ROOT);
+  if (missing.length) {
+    console.error('');
+    console.error('  The offline assets are missing, so the notebook cannot make a sound.');
+    console.error('');
+    for (const item of missing) console.error(`    - ${item}`);
+    console.error('');
+    console.error('  Run this once, on a machine with internet:');
+    console.error('');
+    console.error('      npm run setup');
+    console.error('');
+    process.exit(1);
+  }
 
   const server = createServer();
-  const port = await listenOnFirstFreePort(server, '127.0.0.1', [
-    requested,
-    requested + 1,
-    requested + 2,
-    requested + 3,
-    0,
-  ]);
-  const actual = server.address().port;
-  const url = `http://localhost:${actual}`;
+  const port = await listenOnFreePort(server, '127.0.0.1', preferred);
+  const url = `http://localhost:${port}`;
 
   console.log('');
   console.log('  Strudel Workshop Notebook');
-  console.log(`  ->  ${url}`);
   console.log('');
+  console.log(`      ${url}`);
+  console.log('');
+  if (port !== preferred) {
+    console.log(`  (port ${preferred} was busy, using ${port})`);
+    console.log('');
+  }
   console.log('  Running fully offline. Press Ctrl+C to stop.');
   console.log('');
 
   if (shouldOpen) openBrowser(url);
-  void port;
 }

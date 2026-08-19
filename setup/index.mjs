@@ -10,12 +10,13 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const SETUP_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SETUP_DIR, '..');
 const args = process.argv.slice(2);
 
 function run(script, scriptArgs = []) {
   return new Promise((resolveRun, reject) => {
-    const child = spawn(process.execPath, [join(ROOT, 'scripts', script), ...scriptArgs], {
+    const child = spawn(process.execPath, [join(SETUP_DIR, script), ...scriptArgs], {
       stdio: 'inherit',
       cwd: ROOT,
     });
@@ -53,7 +54,7 @@ try {
 }
 
 console.log('');
-await run('verify-offline.mjs');
+await run('verify.mjs');
 
 console.log('  You can disconnect from the internet now. To start the notebook:');
 console.log('');

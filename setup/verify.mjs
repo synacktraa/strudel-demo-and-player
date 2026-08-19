@@ -16,7 +16,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PASS = '  [ ok ] ';
 const FAIL = '  [FAIL] ';
 
-const report = await checkVendor(join(ROOT, 'vendor'));
+const report = await checkVendor(join(ROOT, 'app', 'vendor'));
 
 console.log('');
 console.log('  Offline readiness check');
@@ -27,7 +27,7 @@ for (const check of report.checks) {
 }
 
 // The page itself must not pull in any sub-resource over the network.
-const html = await readFile(join(ROOT, 'index.html'), 'utf8');
+const html = await readFile(join(ROOT, 'app', 'index.html'), 'utf8');
 const page = checkPageHasNoRemoteRefs(html);
 console.log(
   `${page.ok ? PASS : FAIL}${'index.html sub-resources'.padEnd(30)} ` +
@@ -39,7 +39,7 @@ const ok = report.ok && page.ok;
 console.log('  ' + '-'.repeat(58));
 console.log('');
 if (ok) {
-  console.log('  Ready for the workshop. Start it with:  npm start');
+  console.log('  Ready for the workshop. Start it with:  npm run app');
   console.log('');
 } else {
   console.log('  Not ready. Run `npm run setup` on a machine with internet.');
