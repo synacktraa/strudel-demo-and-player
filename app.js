@@ -46,23 +46,27 @@ function initCellControls() {
     playingStates.set(cellId, false);
 
     if (editor) {
-      const checkEditorReady = setInterval(() => {
-        if (editor.editor && editor.editor.scheduler) {
-          clearInterval(checkEditorReady);
+      // The <strudel-editor> component fires `update` on every REPL state
+      // change, carrying the real started/stopped flag. Driving the button from
+      // that keeps it honest even when a pattern stops without a click.
+      editor.addEventListener('update', (event) => {
+        const started = !!(event.detail && event.detail.started);
+        if (playingStates.get(cellId) !== started) {
+          updateButtonState(btn, cellId, started);
+        }
+      });
 
-          editor.editor.scheduler.on('started', () => {
-            console.log('Scheduler started event for cell:', cellId);
-            updateButtonState(btn, cellId, true);
-          });
-
-          editor.editor.scheduler.on('stopped', () => {
-            console.log('Scheduler stopped event for cell:', cellId);
-            updateButtonState(btn, cellId, false);
-          });
+      // The component defaults to solo, where starting one cell stops every
+      // other one - but this notebook tells students they can play several at
+      // once to layer sounds. Turn solo off as soon as the editor exists.
+      const waitForEditor = setInterval(() => {
+        if (editor.editor) {
+          clearInterval(waitForEditor);
+          editor.editor.solo = false;
         }
       }, 100);
 
-      setTimeout(() => clearInterval(checkEditorReady), 5000);
+      setTimeout(() => clearInterval(waitForEditor), 10000);
     }
 
     btn.addEventListener('click', () => {
