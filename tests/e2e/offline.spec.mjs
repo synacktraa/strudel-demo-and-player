@@ -1,0 +1,167 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * The offline guarantee, enforced.
+ *
+ * Every test here runs with all non-localhost traffic hard-aborted, so a
+ * regression that reintroduces a CDN cannot pass by quietly succeeding on a
+ * machine that happens to have internet.
+ */
+
+const isLocal = (url) =>
+  url.startsWith('http://127.0.0.1:') ||
+  url.startsWith('http://localhost:') ||
+  url.startsWith('data:') ||
+  url.startsWith('blob:');
+
+/**
+ * Abort anything that is not our local server, and record the attempt.
+ *
+ * The route matcher deliberately excludes local URLs rather than matching '**' and
+ * calling continue(): each page load makes ~50 same-origin requests (8 editors x
+ * 6 sample maps), and routing them all through the interceptor is slow enough to
+ * blow the test timeouts.
+ */
+async function blockTheInternet(page) {
+  const attempts = [];
+  page.on('request', (req) => {
+    if (!isLocal(req.url())) attempts.push(req.url());
+  });
+  await page.route(
+    (url) => !isLocal(url.toString()),
+    (route) => route.abort(),
+  );
+  return attempts;
+}
+
+/**
+ * Wait until every <strudel-editor> has booted AND finished prebake.
+ *
+ * Each editor runs its own prebake (loading all six sample maps), so clicking
+ * Play before those settle just queues behind them. Awaiting `prebaked` is what
+ * makes these tests deterministic rather than timing-dependent.
+ */
+async function waitForEditors(page) {
+  // app.js sets this once the play buttons and shortcuts are actually wired.
+  await page.waitForSelector('body[data-notebook-ready="true"]', { timeout: 60_000 });
+  await page.waitForFunction(
+    () => {
+      const eds = [...document.querySelectorAll('strudel-editor')];
+      return eds.length > 0 && eds.every((e) => e.editor && e.editor.repl && e.editor.prebaked);
+    },
+    null,
+    { timeout: 60_000 },
+  );
+  await page.evaluate(() =>
+    Promise.all([...document.querySelectorAll('strudel-editor')].map((e) => e.editor.prebaked)),
+  );
+}
+
+/** Expression evaluating to whether the editor in `section` is playing. */
+const startedIn = (section) =>
+  `document.querySelector('${section} strudel-editor').editor.repl.scheduler.started`;
+
+const started = (n) => startedIn(`#cell-${n}`);
+
+test('loads with the internet blocked and reaches zero external requests', async ({ page }) => {
+  const attempts = await blockTheInternet(page);
+  const consoleErrors = [];
+  page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));
+  page.on('pageerror', (e) => consoleErrors.push(String(e)));
+
+  await page.goto('/');
+  await waitForEditors(page);
+
+  expect(attempts, `page tried to reach the network: ${attempts.join(', ')}`).toEqual([]);
+  expect(consoleErrors).toEqual([]);
+  await expect(page.locator('strudel-editor')).toHaveCount(8);
+});
+
+test('the notebook has no remote sub-resources', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+
+  const remote = await page.evaluate(() =>
+    [...document.querySelectorAll('script[src], link[href], img[src], iframe[src]')]
+      .map((el) => el.getAttribute('src') || el.getAttribute('href'))
+      .filter((v) => v && /^(https?:)?\/\//.test(v)),
+  );
+  expect(remote).toEqual([]);
+});
+
+test('a lesson cell plays a drum pattern from local samples', async ({ page }) => {
+  const attempts = await blockTheInternet(page);
+  const sampleRequests = [];
+  page.on('response', (r) => {
+    if (/\.(wav|mp3|ogg|flac)$/i.test(r.url())) sampleRequests.push({ url: r.url(), status: r.status() });
+  });
+
+  await page.goto('/');
+  await waitForEditors(page);
+
+  await page.locator('#cell-1 .play-btn').click();
+
+  await expect.poll(() => page.evaluate(started(1)), { timeout: 30_000 }).toBe(true);
+  await expect(page.locator('#cell-1 .play-btn')).toHaveText(/Pause/);
+
+  // The scheduler clock must actually advance - "started" alone can be a lie.
+  const t0 = await page.evaluate(() => document.querySelector('#cell-1 strudel-editor').editor.repl.scheduler.now());
+  await page.waitForTimeout(1500);
+  const t1 = await page.evaluate(() => document.querySelector('#cell-1 strudel-editor').editor.repl.scheduler.now());
+  expect(t1, 'scheduler clock did not advance - nothing is playing').toBeGreaterThan(t0);
+
+  expect(sampleRequests.length, 'no audio samples were loaded').toBeGreaterThan(0);
+  expect(sampleRequests.every((r) => r.status === 200)).toBe(true);
+  expect(attempts).toEqual([]);
+});
+
+test('cells layer instead of cutting each other off', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  await page.locator('#cell-1 .play-btn').click();
+  await expect.poll(() => page.evaluate(started(1)), { timeout: 30_000 }).toBe(true);
+
+  await page.locator('#cell-2 .play-btn').click();
+  await expect.poll(() => page.evaluate(started(2)), { timeout: 30_000 }).toBe(true);
+
+  // The "How to Play" section promises students can layer cells - hold it to that.
+  expect(await page.evaluate(started(1)), 'cell 1 was cut off when cell 2 started').toBe(true);
+});
+
+test('Stop All silences every cell and resets every button', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  await page.locator('#cell-1 .play-btn').click();
+  await page.locator('#cell-2 .play-btn').click();
+  await expect.poll(() => page.evaluate(started(2)), { timeout: 30_000 }).toBe(true);
+
+  await page.locator('#stop-all').click();
+
+  await expect.poll(() => page.evaluate(started(1)), { timeout: 15_000 }).toBe(false);
+  await expect.poll(() => page.evaluate(started(2)), { timeout: 15_000 }).toBe(false);
+  await expect(page.locator('#cell-1 .play-btn')).toHaveText(/Play/);
+  await expect(page.locator('#cell-2 .play-btn')).toHaveText(/Play/);
+});
+
+test('the demo cell plays its GM soundfonts from disk', async ({ page }) => {
+  const attempts = await blockTheInternet(page);
+  const soundfonts = [];
+  page.on('response', (r) => {
+    if (r.url().includes('/vendor/soundfonts/')) soundfonts.push(r.status());
+  });
+
+  await page.goto('/');
+  await waitForEditors(page);
+
+  await page.locator('#demo .play-btn').click();
+  await expect.poll(() => page.evaluate(startedIn('#demo')), { timeout: 40_000 }).toBe(true);
+
+  await page.waitForTimeout(4000);
+  expect(soundfonts.length, 'demo cell loaded no soundfonts').toBeGreaterThan(0);
+  expect(soundfonts.every((s) => s === 200)).toBe(true);
+  expect(attempts).toEqual([]);
+});
