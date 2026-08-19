@@ -2,6 +2,10 @@ const initialCode = new Map();
 let focusedEditor = null;
 const playingStates = new Map();
 
+// Icons come from the inline <svg> sprite in index.html - no icon CDN, so the
+// notebook renders identically with the network disconnected.
+const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+
 function getEditorForButton(btn) {
   const cellId = btn.getAttribute('data-cell');
   const cell = btn.closest('.cell');
@@ -15,7 +19,7 @@ function updateButtonState(btn, cellId, isPlaying) {
   console.log('updateButtonState called:', cellId, isPlaying);
 
   if (isPlaying) {
-    btn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    btn.innerHTML = icon('pause') + ' Pause';
     btn.classList.add('playing');
     playingStates.set(cellId, true);
 
@@ -28,7 +32,7 @@ function updateButtonState(btn, cellId, isPlaying) {
       easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
     });
   } else {
-    btn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+    btn.innerHTML = icon('play') + ' Play';
     btn.classList.remove('playing');
     playingStates.set(cellId, false);
   }

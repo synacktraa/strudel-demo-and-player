@@ -8,6 +8,18 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!--
+    Inline icon sprite. Replaces the Font Awesome CDN kit so the notebook has no
+    network dependency at all - see README "Running offline".
+  -->
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.14-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z"/></symbol>
+    <symbol id="icon-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4.25a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8zm1.6 11.25h-3.2v-1.3h.9v-4h-.9v-1.3h2.9v5.3h.9z"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.88 18.3 9.17 12 2.88 5.71 4.3 4.3l6.29 6.29 6.3-6.29z"/></symbol>
+  </svg>
+
   <header id="header">
     <div class="header-content">
       <div class="title-section">
@@ -54,7 +66,7 @@
       <div class="cell-header">
         <h3>What Strudel Can Do</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="demo"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="demo"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Listen to what's possible with Strudel.</strong> This example showcases layered drums, bass, chords, and effects working together.</p>
@@ -94,9 +106,9 @@ stack(
       <div class="cell-header">
         <h3>Cell 1: Basic Rhythm</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="1"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="1"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
           <button class="info-btn" id="info-btn" aria-label="Info">
-            <i class="fa-solid fa-circle-info"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg>
           </button>
         </div>
       </div>
@@ -117,7 +129,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 2: Pattern Repetition</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="2"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="2"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Use <code>*</code> to repeat sounds and create more complex rhythms</p>
@@ -137,7 +149,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 3: Melody</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="3"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="3"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Create melodic patterns using notes</p>
@@ -157,7 +169,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 4: Instruments & Sounds</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="4"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="4"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Explore different instrument sounds</p>
@@ -177,7 +189,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 5: Layering</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="5"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="5"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Combine multiple patterns using <code>stack()</code></p>
@@ -197,7 +209,7 @@ stack(
       <div class="cell-header">
         <h3>Cell 6: Effects</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="6"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="6"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Objective:</strong> Add audio effects to shape your sound</p>
@@ -217,7 +229,7 @@ stack(
       <div class="cell-header">
         <h3>Build Your Own</h3>
         <div class="cell-controls">
-          <button class="play-btn" data-cell="build"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="play-btn" data-cell="build"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg> Play</button>
         </div>
       </div>
       <p class="objective"><strong>Create something from scratch!</strong> Use everything you've learned to compose your own pattern.</p>
@@ -246,14 +258,18 @@ stack(
     <div class="modal-overlay"></div>
     <div class="modal-content">
       <button class="modal-close" id="modal-close" aria-label="Close">
-        <i class="fa-solid fa-xmark"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
       </button>
       <img src="image.png" alt="Drum Kit Guide" class="modal-image">
     </div>
   </div>
 
-  <script src="https://kit.fontawesome.com/c6a35e66f0.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@strudel/repl@1"></script>
+  <!--
+    Local Strudel build. Produced by `npm run setup`, which downloads
+    @strudel/repl and rewrites its sample/soundfont URLs to /vendor/... paths.
+    If this 404s, run `npm run setup` (needs internet, once per machine).
+  -->
+  <script src="vendor/strudel/index.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

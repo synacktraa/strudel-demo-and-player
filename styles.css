@@ -540,3 +540,32 @@ strudel-editor {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Inline SVG icons
+
+   These replace the Font Awesome CDN kit. The sprite lives at the top of
+   index.html; buttons reference it with <use href="#icon-name">. currentColor
+   keeps every icon in step with its button's text colour.
+   --------------------------------------------------------------------------- */
+
+.icon-sprite {
+  display: none;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+.play-btn,
+.stop-all-btn,
+.info-btn,
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
