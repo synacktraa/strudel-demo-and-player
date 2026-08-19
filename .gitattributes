@@ -1,0 +1,20 @@
+# Launchers must keep the line endings their shell expects.
+# A .sh file checked out with CRLF fails on macOS/Linux with "bad interpreter: ^M",
+# and the workshop machines run all three operating systems.
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Everything else is normal text; keep it LF in the repository.
+*.mjs text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+
+*.png binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
