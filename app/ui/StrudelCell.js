@@ -13,7 +13,6 @@
  */
 import { html, useRef, useEffect, useState, useCallback } from './runtime.js';
 import { Icon } from './Icon.js';
-import { CopyButton } from './CopyButton.js';
 
 /** Poll rather than await: the component assigns `.editor` after a setTimeout. */
 const EDITOR_POLL_MS = 100;
@@ -81,6 +80,23 @@ function useStrudelEditor(cell, onRegister) {
 export function StrudelCell({ cell, onRegister, onInfo }) {
   const { hostRef, elementRef, playing, ready, toggle } = useStrudelEditor(cell, onRegister);
   const [showHint, setShowHint] = useState(false);
+  // Checked when the hint opens, so the button can say "Replace" rather than
+  // quietly discarding whatever the student already wrote.
+  const [willReplace, setWillReplace] = useState(false);
+
+  const toggleHint = useCallback(() => {
+    setShowHint((open) => {
+      if (!open) setWillReplace(Boolean(elementRef.current?.editor?.code?.trim()));
+      return !open;
+    });
+  }, []);
+
+  // Drop the pattern straight into the editor. The panel has served its
+  // purpose once the code is in the cell, so it closes behind itself.
+  const insertHint = useCallback(() => {
+    elementRef.current?.editor?.setCode?.(cell.hint);
+    setShowHint(false);
+  }, [cell.hint]);
 
   // Ctrl+Enter plays this cell, Ctrl+. stops it - captured on the way down so
   // CodeMirror's own bindings don't swallow them first.
@@ -122,7 +138,7 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
                   type="button"
                   class="ghost-btn"
                   aria-pressed=${showHint ? 'true' : 'false'}
-                  onClick=${() => setShowHint((v) => !v)}
+                  onClick=${toggleHint}
                   title="Show a pattern to try"
                 >
                   <${Icon} name="bulb" /> Hint
@@ -165,7 +181,10 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
         ? html`
             <div class="cell__hint">
               <pre><code>${cell.hint}</code></pre>
-              <${CopyButton} text=${cell.hint} />
+              <button type="button" class="insert-btn" onClick=${insertHint}>
+                <${Icon} name="insert" />
+                <span>${willReplace ? 'Replace' : 'Insert'}</span>
+              </button>
             </div>
           `
         : null}

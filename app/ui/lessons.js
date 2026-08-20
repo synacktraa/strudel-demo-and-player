@@ -9,26 +9,14 @@
  * written live in front of the class. Only the showcase is pre-filled.
  */
 
-export const INTRO = [
-  {
-    id: 'welcome',
-    title: 'Welcome',
-    body: [
-      "You'll make music by writing code, live. Every cell below is editable - play it, break it, fix it.",
-    ],
-  },
-  {
-    id: 'what-is',
-    title: 'What is Strudel?',
-    body: [
-      'Strudel is a live-coding environment for making patterns and music in the browser, built on the TidalCycles pattern language.',
-      'A pattern loops forever until you stop it. Change the code, press play again, and it changes with you.',
-    ],
-  },
-];
+export const HERO = {
+  id: 'welcome',
+  title: 'Make music by writing code',
+  lead: 'Strudel is a live-coding environment for building patterns and music in the browser, based on the TidalCycles pattern language.',
+  body: 'A pattern loops until you stop it. Change the code, press play again, and it changes with you.',
+};
 
 export const HOW_TO = {
-  id: 'how-to',
   title: 'How to play',
   items: [
     ['Play', 'Each cell has its own Play button - or press Ctrl+Enter while editing it.'],

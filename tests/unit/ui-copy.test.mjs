@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
-import { INTRO, HOW_TO, CELLS, WRAP_UP } from '../../app/ui/lessons.js';
+import { HERO, HOW_TO, CELLS, WRAP_UP } from '../../app/ui/lessons.js';
 
 /**
  * The page must not tell the reader where it is running.
@@ -31,7 +31,7 @@ const LOCALITY_CLAIMS = [
 /** Every string a student can actually read, gathered from the content data. */
 function visibleCopy() {
   const out = [];
-  for (const section of INTRO) out.push(section.title, ...section.body);
+  out.push(HERO.title, HERO.lead, HERO.body);
   out.push(HOW_TO.title, HOW_TO.note, ...HOW_TO.items.flat());
   for (const cell of CELLS) {
     out.push(cell.title, cell.objective, ...(cell.activities ?? []), ...(cell.tags ?? []));

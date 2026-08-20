@@ -219,8 +219,7 @@ test('the equalizer reacts to what is playing', async ({ page }) => {
   await expect(page.locator('.equalizer')).toHaveClass(/is-active/);
 });
 
-test('the hint panel copies its pattern to the clipboard', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('the hint inserts its pattern into the cell and then closes', async ({ page }) => {
   await blockTheInternet(page);
   await page.goto('/');
   await waitForEditors(page);
@@ -234,14 +233,32 @@ test('the hint panel copies its pattern to the clipboard', async ({ page, contex
   expect(hint).toContain('stack(');
   expect(hint.split('\n').length).toBeGreaterThan(1);
 
-  await cell.locator('.copy-btn').click();
-  await expect(cell.locator('.copy-btn')).toHaveText(/Copied/);
+  // An empty cell is the normal case, so nothing is at risk of being lost.
+  await expect(cell.locator('.insert-btn')).toHaveText(/Insert/);
+  await cell.locator('.insert-btn').click();
 
-  // Windows normalises clipboard newlines to CRLF, which is correct platform
-  // behaviour and pastes fine - so compare on content, not line endings.
-  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
-  expect(clipboard.replace(/\r\n/g, '\n').trim()).toBe(hint.trim());
+  const inserted = await page.evaluate(
+    () => document.querySelector('#cell-5 strudel-editor').editor.code,
+  );
+  expect(inserted.trim()).toBe(hint.trim());
 
-  // Feedback reverts so the button is reusable.
-  await expect(cell.locator('.copy-btn')).toHaveText(/Copy/, { timeout: 5000 });
+  // The panel has done its job once the code is in the cell.
+  await expect(cell.locator('.cell__hint')).toHaveCount(0);
+
+  // And the inserted pattern actually runs.
+  await cell.locator('.play-btn').click();
+  await expect.poll(() => page.evaluate(started(5)), { timeout: 30_000 }).toBe(true);
+});
+
+test('the hint warns before overwriting work already in the cell', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  await enterCode(page, '#cell-3', 'note("e f g")');
+
+  const cell = page.locator('#cell-3');
+  await cell.getByRole('button', { name: /hint/i }).click();
+  // Same action, honest label - the student can see their code will go.
+  await expect(cell.locator('.insert-btn')).toHaveText(/Replace/);
 });

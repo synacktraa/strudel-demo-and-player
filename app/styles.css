@@ -296,7 +296,7 @@ code {
   background: var(--accent-soft);
 }
 
-/* ------------------------------------------------------------------- prose */
+/* -------------------------------------------------------------------- hero */
 
 main {
   max-width: var(--shell);
@@ -307,15 +307,101 @@ main {
   gap: 1.5rem;
 }
 
+.hero {
+  padding: 0.5rem 0 0.75rem;
+}
+
+.hero h2 {
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  font-weight: 660;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  margin-bottom: 0.75rem;
+  /* The one place the two accents meet, to anchor the palette up front. */
+  background: linear-gradient(96deg, var(--text) 30%, var(--accent) 70%, var(--violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero__lead {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  max-width: 62ch;
+}
+
+.hero__body {
+  margin-top: 0.55rem;
+  color: var(--text-faint);
+  max-width: 62ch;
+}
+
+/* Four short cards instead of four full-width rows: the same information in
+   about a third of the vertical space, so the first cell is nearer the fold. */
+.hero__guide {
+  margin-top: 1.6rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+.guide-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .guide-card:hover {
+    border-color: var(--line-bright);
+    transform: translateY(-2px);
+  }
+}
+
+.guide-card__term {
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.guide-card__desc {
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+.hero__note {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
+@media (max-width: 860px) {
+  .hero__guide {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero__guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------------------- prose */
+
 .prose h2 {
   font-size: 1.25rem;
   font-weight: 620;
   letter-spacing: -0.01em;
   margin-bottom: 0.6rem;
-}
-
-.prose p + p {
-  margin-top: 0.6rem;
 }
 
 .prose p,
@@ -328,51 +414,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-}
-
-.note {
-  margin-top: 0.9rem;
-  padding: 0.7rem 0.95rem;
-  border-left: 2px solid var(--line-bright);
-  background: var(--bg-raised);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.88rem;
-  color: var(--text-faint) !important;
-}
-
-.howto {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-}
-
-.howto__row {
-  display: grid;
-  grid-template-columns: 5.5rem 1fr;
-  gap: 0.9rem;
-  align-items: baseline;
-  padding: 0.55rem 0.9rem;
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-}
-
-.howto__row dt {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--accent);
-}
-
-.howto__row dd {
-  font-size: 0.9rem;
-  color: var(--text-dim);
-}
-
-@media (max-width: 560px) {
-  .howto__row {
-    grid-template-columns: 1fr;
-    gap: 0.2rem;
-  }
 }
 
 /* ------------------------------------------------------------------- cells */
@@ -540,7 +581,7 @@ main {
   color: var(--accent);
 }
 
-.copy-btn {
+.insert-btn {
   position: absolute;
   top: 0.45rem;
   right: 0.45rem;
@@ -563,21 +604,16 @@ main {
     transform var(--fast) var(--ease);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .copy-btn:hover {
-    color: var(--text);
-    border-color: var(--text-faint);
-  }
-}
-
-.copy-btn:active {
+.insert-btn:active {
   transform: scale(0.94);
 }
 
-.copy-btn.is-copied {
-  color: var(--accent);
-  border-color: rgba(195, 232, 141, 0.5);
-  background: var(--accent-soft);
+@media (hover: hover) and (pointer: fine) {
+  .insert-btn:hover {
+    color: var(--accent);
+    border-color: rgba(195, 232, 141, 0.5);
+    background: var(--accent-soft);
+  }
 }
 
 @keyframes hint-in {

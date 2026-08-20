@@ -6,7 +6,7 @@ import { Icon } from './Icon.js';
 import { Equalizer } from './Equalizer.js';
 import { StrudelCell } from './StrudelCell.js';
 import { useMasterAnalyser } from './useMasterAnalyser.js';
-import { INTRO, HOW_TO, CELLS, WRAP_UP, NAV } from './lessons.js';
+import { HERO, HOW_TO, CELLS, WRAP_UP, NAV } from './lessons.js';
 
 /** Track which section is in view, to highlight the nav. */
 function useActiveSection(ids) {
@@ -142,28 +142,22 @@ export function Notebook() {
       </header>
 
       <main>
-        ${INTRO.map(
-          (section) => html`
-            <section key=${section.id} id=${section.id} class="prose">
-              <h2>${section.title}</h2>
-              ${section.body.map((p, i) => html`<p key=${i}>${p}</p>`)}
-            </section>
-          `,
-        )}
+        <section id=${HERO.id} class="hero">
+          <h2>${HERO.title}</h2>
+          <p class="hero__lead">${HERO.lead}</p>
+          <p class="hero__body">${HERO.body}</p>
 
-        <section id=${HOW_TO.id} class="prose">
-          <h2>${HOW_TO.title}</h2>
-          <dl class="howto">
+          <div class="hero__guide">
             ${HOW_TO.items.map(
               ([term, desc]) => html`
-                <div key=${term} class="howto__row">
-                  <dt>${term}</dt>
-                  <dd>${desc}</dd>
+                <div key=${term} class="guide-card">
+                  <span class="guide-card__term">${term}</span>
+                  <span class="guide-card__desc">${desc}</span>
                 </div>
               `,
             )}
-          </dl>
-          <p class="note">${HOW_TO.note}</p>
+          </div>
+          <p class="hero__note">${HOW_TO.note}</p>
         </section>
 
         ${CELLS.map(
