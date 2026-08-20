@@ -154,7 +154,9 @@ npm run setup -- --profile=generous
 the class. Only the demo cell at the top is pre-filled, as a "here's where this goes"
 showcase.
 
-A cheat sheet for what to type into each, if you want one on the podium:
+Each cell has a **Hint** button showing the pattern below, so you don't have to remember
+them. They are the same strings listed here — `tests/unit/hints.test.mjs` fails if the two
+drift apart.
 
 **1 · Rhythm**
 

@@ -148,7 +148,10 @@ stack(
       'Add a third layer',
     ],
     tags: ['layering', 'polyphony'],
-    hint: 'stack(s("bd*2 hh*4"), note("c e g e").sound("sawtooth"))',
+    hint: `stack(
+  s("bd*2 hh*4 sd hh*2"),
+  note("c e g e").sound("sawtooth")
+)`,
     code: '',
   },
   {
@@ -163,7 +166,10 @@ stack(
       'Try <code>.lpf(800)</code> or <code>.distort(0.5)</code>',
     ],
     tags: ['effects', 'mixing'],
-    hint: 'note("c e g b").sound("sawtooth").room(0.6).delay(0.4)',
+    hint: `note("c e g b a g e c")
+  .sound("sawtooth")
+  .room(0.6)
+  .delay(0.4)`,
     code: '',
   },
   {
@@ -173,6 +179,12 @@ stack(
     title: 'Build your own',
     objective: 'Everything you have learned, in one cell. Make something.',
     tags: ['free exploration'],
+    hint: `// Combine what you learned:
+//   s("bd*2 hh*4")       drums
+//   note("c e g")        melody
+//   stack(a, b)          layers
+//   .room(0.5)           effects
+s("bd*2 hh*4")`,
     code: '',
   },
 ];

@@ -184,3 +184,37 @@ test('the demo cell plays its GM soundfonts from disk', async ({ page }) => {
   expect(soundfonts.every((s) => s === 200)).toBe(true);
   expect(attempts).toEqual([]);
 });
+
+
+test('the equalizer reacts to what is playing', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  const ink = () =>
+    page.evaluate(() => {
+      const c = document.querySelector('.equalizer canvas');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 40) n++;
+      return n;
+    });
+
+  const atRest = await ink();
+  expect(atRest, 'idle equalizer should still draw resting bars').toBeGreaterThan(0);
+
+  await enterCode(page, '#cell-1', 's("bd*4 hh*8").gain(1)');
+  await page.locator('#cell-1 .play-btn').click();
+  await expect.poll(() => page.evaluate(started(1)), { timeout: 30_000 }).toBe(true);
+
+  // Sample repeatedly: bars swing, so a single frame could catch a trough.
+  let loudest = 0;
+  for (let i = 0; i < 20; i++) {
+    loudest = Math.max(loudest, await ink());
+    await page.waitForTimeout(150);
+  }
+  expect(loudest, 'equalizer never rose above its resting state while audio played')
+    .toBeGreaterThan(atRest * 3);
+
+  await expect(page.locator('.equalizer')).toHaveClass(/is-active/);
+});
