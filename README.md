@@ -150,16 +150,22 @@ npm run setup -- --profile=generous
 - **Stop All Sounds** in the header is the panic button.
 - Students edit the code in place and press Play again to hear the change.
 
-The lesson cells ship with starter patterns:
+**The six lesson cells ship empty on purpose** — the plan is to write them live in front of
+the class. Only the demo cell at the top is pre-filled, as a "here's where this goes"
+showcase.
 
-| Cell | Concept | Starter |
+A cheat sheet for what to type into each, if you want one on the podium:
+
+| Cell | Concept | Type something like |
 |---|---|---|
 | 1 | Rhythm | `s("bd hh sd hh")` |
 | 2 | Repetition | `s("bd*2 hh*4 sd hh*2")` |
 | 3 | Melody | `note("c e g e a g e c")` |
 | 4 | Instruments | `note("c e g b").sound("sawtooth")` |
-| 5 | Layering | `stack(...)` with drums + melody |
-| 6 | Effects | `.room(0.6).delay(0.4)` |
+| 5 | Layering | `stack(s("bd*2 hh*4"), note("c e g e").sound("sawtooth"))` |
+| 6 | Effects | `note("c e g b").sound("sawtooth").room(0.6).delay(0.4)` |
+
+Every sound named above is vendored, so all of it works offline.
 
 ---
 

@@ -63,6 +63,18 @@ const startedIn = (section) =>
 
 const started = (n) => startedIn(`#cell-${n}`);
 
+/**
+ * Put code into a lesson cell. The cells ship empty so the teacher can write
+ * them live, so every playback test has to type something first - which is
+ * also exactly what happens in the room.
+ */
+async function enterCode(page, section, code) {
+  await page.evaluate(
+    ([sel, src]) => document.querySelector(sel + ' strudel-editor').editor.setCode(src),
+    [section, code],
+  );
+}
+
 test('loads with the internet blocked and reaches zero external requests', async ({ page }) => {
   const attempts = await blockTheInternet(page);
   const consoleErrors = [];
@@ -99,6 +111,7 @@ test('a lesson cell plays a drum pattern from local samples', async ({ page }) =
   await page.goto('/');
   await waitForEditors(page);
 
+  await enterCode(page, '#cell-1', 's("bd hh sd hh")');
   await page.locator('#cell-1 .play-btn').click();
 
   await expect.poll(() => page.evaluate(started(1)), { timeout: 30_000 }).toBe(true);
@@ -120,6 +133,9 @@ test('cells layer instead of cutting each other off', async ({ page }) => {
   await page.goto('/');
   await waitForEditors(page);
 
+  await enterCode(page, '#cell-1', 's("bd*2 hh*4")');
+  await enterCode(page, '#cell-2', 'note("c e g e").sound("sawtooth")');
+
   await page.locator('#cell-1 .play-btn').click();
   await expect.poll(() => page.evaluate(started(1)), { timeout: 30_000 }).toBe(true);
 
@@ -134,6 +150,9 @@ test('Stop All silences every cell and resets every button', async ({ page }) =>
   await blockTheInternet(page);
   await page.goto('/');
   await waitForEditors(page);
+
+  await enterCode(page, '#cell-1', 's("bd*2 hh*4")');
+  await enterCode(page, '#cell-2', 's("sd cp")');
 
   await page.locator('#cell-1 .play-btn').click();
   await page.locator('#cell-2 .play-btn').click();
