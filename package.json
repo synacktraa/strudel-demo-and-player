@@ -1,0 +1,23 @@
+{
+  "name": "strudel-workshop-notebook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline-first interactive notebook for teaching live-coding music with Strudel",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "setup": "node setup/index.mjs",
+    "app": "node app/server.mjs",
+    "verify": "node setup/verify.mjs",
+    "test": "node --test \"tests/unit/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e",
+    "app:online": "node app/server.mjs --online",
+    "test:online": "playwright test --config=playwright.online.config.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

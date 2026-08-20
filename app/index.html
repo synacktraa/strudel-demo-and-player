@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strudel Workshop Notebook</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <!--
+    `npm run setup` downloads these into app/vendor/ and rewrites Strudel's
+    internal URLs to point there, so this page as written makes no network
+    requests at all. `npm run app:online` swaps these four tags for CDN URLs
+    as the page is served; the file on disk stays offline either way.
+  -->
+  <script src="vendor/ui-libs/react.js"></script>
+  <script src="vendor/ui-libs/react-dom.js"></script>
+  <script src="vendor/ui-libs/htm.js"></script>
+  <script src="vendor/strudel/index.js"></script>
+  <script type="module" src="ui/main.js"></script>
+</body>
+</html>
