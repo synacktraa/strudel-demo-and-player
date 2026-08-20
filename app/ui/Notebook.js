@@ -3,6 +3,7 @@
  */
 import { html, useState, useEffect, useRef, useCallback, Fragment } from './runtime.js';
 import { Icon } from './Icon.js';
+import { T, both, UI, useLanguageMode, LanguageToggle } from './i18n.js';
 import { Equalizer } from './Equalizer.js';
 import { StrudelCell } from './StrudelCell.js';
 import { useMasterAnalyser } from './useMasterAnalyser.js';
@@ -58,7 +59,7 @@ function InfoModal({ open, onClose }) {
         <button type="button" class="modal__close" onClick=${onClose} aria-label="Close">
           <${Icon} name="close" />
         </button>
-        <img src="image.png" alt="Drum kit guide" />
+        <img src="image.png" alt=${both(UI.drumGuide)} />
       </div>
     </div>
   `;
@@ -68,6 +69,7 @@ export function Notebook() {
   const editors = useRef(new Map());
   const [anyPlaying, setAnyPlaying] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [langMode, setLangMode] = useLanguageMode();
   const analyser = useMasterAnalyser();
   const { active, scrolled } = useActiveSection(NAV.map((n) => n.id));
 
@@ -116,12 +118,13 @@ export function Notebook() {
         <div class="header__top">
           <div class="header__title">
             <h1>Strudel Workshop</h1>
-            <p>Write code. Hear it immediately.</p>
+            <p><${T} text=${UI.tagline} /></p>
           </div>
           <div class="header__right">
+            <${LanguageToggle} mode=${langMode} onChange=${setLangMode} />
             <${Equalizer} analyser=${analyser} active=${anyPlaying} />
             <button type="button" id="stop-all" class="stop-all-btn" onClick=${stopAll}>
-              <${Icon} name="stop" /> Stop All Sounds
+              <${Icon} name="stop" /> <${T} text=${UI.stopAll} />
             </button>
           </div>
         </div>
@@ -134,7 +137,7 @@ export function Notebook() {
                 class=${active === item.id ? 'active' : ''}
                 onClick=${(e) => jumpTo(e, item.id)}
               >
-                ${item.nav}
+                <${T} text=${item.nav} />
               </a>
             `,
           )}
@@ -143,21 +146,21 @@ export function Notebook() {
 
       <main>
         <section id=${HERO.id} class="hero">
-          <h2>${HERO.title}</h2>
-          <p class="hero__lead">${HERO.lead}</p>
-          <p class="hero__body">${HERO.body}</p>
+          <h2><${T} text=${HERO.title} /></h2>
+          <p class="hero__lead"><${T} text=${HERO.lead} /></p>
+          <p class="hero__body"><${T} text=${HERO.body} /></p>
 
           <div class="hero__guide">
             ${HOW_TO.items.map(
               ([term, desc]) => html`
-                <div key=${term} class="guide-card">
-                  <span class="guide-card__term">${term}</span>
-                  <span class="guide-card__desc">${desc}</span>
+                <div key=${term.en} class="guide-card">
+                  <span class="guide-card__term"><${T} text=${term} /></span>
+                  <span class="guide-card__desc"><${T} text=${desc} /></span>
                 </div>
               `,
             )}
           </div>
-          <p class="hero__note">${HOW_TO.note}</p>
+          <p class="hero__note"><${T} text=${HOW_TO.note} /></p>
         </section>
 
         ${CELLS.map(
@@ -172,10 +175,10 @@ export function Notebook() {
         )}
 
         <section id=${WRAP_UP.id} class="prose">
-          <h2>${WRAP_UP.title}</h2>
+          <h2><${T} text=${WRAP_UP.title} /></h2>
           <ul>
             ${WRAP_UP.items.map(
-              (item, i) => html`<li key=${i} dangerouslySetInnerHTML=${{ __html: item }}></li>`,
+              (item, i) => html`<li key=${i}><${T} text=${item} rich /></li>`,
             )}
           </ul>
         </section>

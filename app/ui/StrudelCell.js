@@ -13,6 +13,7 @@
  */
 import { html, useRef, useEffect, useState, useCallback } from './runtime.js';
 import { Icon } from './Icon.js';
+import { T, both, UI } from './i18n.js';
 
 /** Poll rather than await: the component assigns `.editor` after a setTimeout. */
 const EDITOR_POLL_MS = 100;
@@ -129,7 +130,7 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
       <div class="cell__bar">
         <div class="cell__heading">
           ${cell.lesson ? html`<span class="cell__number">${cell.lesson}</span>` : null}
-          <h3>${cell.title}</h3>
+          <h3><${T} text=${cell.title} /></h3>
         </div>
         <div class="cell__controls">
           ${cell.hint
@@ -139,15 +140,15 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
                   class="ghost-btn"
                   aria-pressed=${showHint ? 'true' : 'false'}
                   onClick=${toggleHint}
-                  title="Show a pattern to try"
+                  title=${both(UI.hintTip)}
                 >
-                  <${Icon} name="bulb" /> Hint
+                  <${Icon} name="bulb" /> <${T} text=${UI.hint} />
                 </button>
               `
             : null}
           ${cell.info
             ? html`
-                <button type="button" class="ghost-btn" onClick=${onInfo} aria-label="Drum kit guide">
+                <button type="button" class="ghost-btn" onClick=${onInfo} aria-label=${both(UI.drumGuide)}>
                   <${Icon} name="info" />
                 </button>
               `
@@ -160,18 +161,18 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
             onClick=${toggle}
           >
             <${Icon} name=${playing ? 'pause' : 'play'} />
-            ${playing ? 'Pause' : 'Play'}
+            <${T} text=${playing ? UI.pause : UI.play} />
           </button>
         </div>
       </div>
 
-      <p class="cell__objective" dangerouslySetInnerHTML=${{ __html: cell.objective }}></p>
+      <p class="cell__objective" ><${T} text=${cell.objective} rich /></p>
 
       ${cell.activities
         ? html`
             <ul class="cell__activities">
               ${cell.activities.map(
-                (a, i) => html`<li key=${i} dangerouslySetInnerHTML=${{ __html: a }}></li>`,
+                (a, i) => html`<li key=${i}><${T} text=${a} rich /></li>`,
               )}
             </ul>
           `
@@ -183,7 +184,7 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
               <pre><code>${cell.hint}</code></pre>
               <button type="button" class="insert-btn" onClick=${insertHint}>
                 <${Icon} name="insert" />
-                <span>${willReplace ? 'Replace' : 'Insert'}</span>
+                <${T} text=${willReplace ? UI.replace : UI.insert} />
               </button>
             </div>
           `
@@ -194,7 +195,7 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
       ${cell.tags?.length
         ? html`
             <div class="cell__tags">
-              ${cell.tags.map((t) => html`<span key=${t} class="tag">${t}</span>`)}
+              ${cell.tags.map((tag) => html`<span key=${tag.en} class="tag"><${T} text=${tag} /></span>`)}
             </div>
           `
         : null}

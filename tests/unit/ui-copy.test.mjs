@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
 import { HERO, HOW_TO, CELLS, WRAP_UP } from '../../app/ui/lessons.js';
+import { UI } from '../../app/ui/text.js';
 
 /**
  * The page must not tell the reader where it is running.
@@ -28,16 +29,22 @@ const LOCALITY_CLAIMS = [
   /\bworks offline\b/i,
 ];
 
-/** Every string a student can actually read, gathered from the content data. */
+/**
+ * Every string a reader can see, in BOTH languages.
+ *
+ * Copy is stored as {id, en} pairs, so each one contributes two strings - a
+ * claim reintroduced in only one language would otherwise slip through.
+ */
 function visibleCopy() {
-  const out = [];
-  out.push(HERO.title, HERO.lead, HERO.body);
-  out.push(HOW_TO.title, HOW_TO.note, ...HOW_TO.items.flat());
+  const pairs = [];
+  pairs.push(HERO.title, HERO.lead, HERO.body);
+  pairs.push(HOW_TO.title, HOW_TO.note, ...HOW_TO.items.flat());
   for (const cell of CELLS) {
-    out.push(cell.title, cell.objective, ...(cell.activities ?? []), ...(cell.tags ?? []));
+    pairs.push(cell.title, cell.objective, ...(cell.activities ?? []), ...(cell.tags ?? []));
   }
-  out.push(WRAP_UP.title, ...WRAP_UP.items);
-  return out.filter(Boolean);
+  pairs.push(WRAP_UP.title, ...WRAP_UP.items);
+  pairs.push(...Object.values(UI));
+  return pairs.filter(Boolean).flatMap((p) => [p.id, p.en]).filter(Boolean);
 }
 
 test('lesson content makes no claim about where the notebook runs', () => {
