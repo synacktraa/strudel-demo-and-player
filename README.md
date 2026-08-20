@@ -156,14 +156,47 @@ showcase.
 
 A cheat sheet for what to type into each, if you want one on the podium:
 
-| Cell | Concept | Type something like |
-|---|---|---|
-| 1 | Rhythm | `s("bd hh sd hh")` |
-| 2 | Repetition | `s("bd*2 hh*4 sd hh*2")` |
-| 3 | Melody | `note("c e g e a g e c")` |
-| 4 | Instruments | `note("c e g b").sound("sawtooth")` |
-| 5 | Layering | `stack(s("bd*2 hh*4"), note("c e g e").sound("sawtooth"))` |
-| 6 | Effects | `note("c e g b").sound("sawtooth").room(0.6).delay(0.4)` |
+**1 · Rhythm**
+
+```js
+s("bd hh sd hh")
+```
+
+**2 · Repetition**
+
+```js
+s("bd*2 hh*4 sd hh*2")
+```
+
+**3 · Melody**
+
+```js
+note("c e g e a g e c")
+```
+
+**4 · Instruments**
+
+```js
+note("c e g b").sound("sawtooth")
+```
+
+**5 · Layering**
+
+```js
+stack(
+  s("bd*2 hh*4 sd hh*2"),
+  note("c e g e").sound("sawtooth")
+)
+```
+
+**6 · Effects**
+
+```js
+note("c e g b a g e c")
+  .sound("sawtooth")
+  .room(0.6)
+  .delay(0.4)
+```
 
 Every sound named above is vendored, so all of it works offline.
 
