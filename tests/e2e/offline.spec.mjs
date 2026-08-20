@@ -262,3 +262,42 @@ test('the hint warns before overwriting work already in the cell', async ({ page
   // Same action, honest label - the student can see their code will go.
   await expect(cell.locator('.insert-btn')).toHaveText(/Replace/);
 });
+
+test('a single-language mode renders as primary text, not as a gloss', async ({ page }) => {
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  const setMode = async (mode) => {
+    await page.locator(`.lang-toggle button:text-is("${mode}")`).click();
+    await page.waitForTimeout(150);
+  };
+
+  // How the primary line looks when Indonesian is alone.
+  await setMode('ID');
+  const primary = await page.evaluate(() => {
+    const s = getComputedStyle(document.querySelector('.hero__lead .bi__id'));
+    return { fontSize: s.fontSize, fontStyle: s.fontStyle, color: s.color };
+  });
+
+  // English alone must match it - not stay small, dim and italic as it is when
+  // it sits underneath the Indonesian.
+  await setMode('EN');
+  const alone = await page.evaluate(() => {
+    const s = getComputedStyle(document.querySelector('.hero__lead .bi__en'));
+    return { fontSize: s.fontSize, fontStyle: s.fontStyle, color: s.color };
+  });
+
+  expect(alone, 'EN-only still uses the secondary treatment').toEqual(primary);
+
+  // And the gradient heading must still be painted, not filled flat.
+  const heading = await page.evaluate(
+    () => getComputedStyle(document.querySelector('.hero h2 .bi__en')).webkitTextFillColor,
+  );
+  expect(heading).toBe('rgba(0, 0, 0, 0)');
+
+  // Both languages present again in the default mode.
+  await setMode('ID + EN');
+  await expect(page.locator('.hero__lead .bi__id')).toBeVisible();
+  await expect(page.locator('.hero__lead .bi__en')).toBeVisible();
+});

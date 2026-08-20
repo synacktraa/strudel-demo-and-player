@@ -9,33 +9,35 @@
  * written live in front of the class. Only the showcase is pre-filled.
  */
 
+import { t } from './text.js';
+
 export const HERO = {
   id: 'welcome',
-  title: 'Make music by writing code',
-  lead: 'Strudel is a live-coding environment for building patterns and music in the browser, based on the TidalCycles pattern language.',
-  body: 'A pattern loops until you stop it. Change the code, press play again, and it changes with you.',
+  title: t('Buat musik dengan menulis kode', 'Make music by writing code'),
+  lead: t('Strudel adalah lingkungan live-coding untuk membuat pola dan musik langsung di browser, dibangun di atas bahasa pola TidalCycles.', 'Strudel is a live-coding environment for building patterns and music in the browser, based on the TidalCycles pattern language.'),
+  body: t('Sebuah pola akan terus berulang sampai kamu menghentikannya. Ubah kodenya, tekan play lagi, dan musiknya ikut berubah.', 'A pattern loops until you stop it. Change the code, press play again, and it changes with you.'),
 };
 
 export const HOW_TO = {
-  title: 'How to play',
+  title: t('Cara memainkannya', 'How to play'),
   items: [
-    ['Play', 'Each cell has its own Play button - or press Ctrl+Enter while editing it.'],
-    ['Stop', 'Press the same button again, or Ctrl+. to stop just that cell.'],
-    ['Layer', 'Cells do not interrupt each other. Run several at once and they stack.'],
-    ['Panic', 'Stop All Sounds in the header kills everything at once.'],
+    [t('Putar', 'Play'), t('Tiap sel punya tombol Play sendiri, atau tekan Ctrl+Enter.', 'Each cell has its own Play button, or press Ctrl+Enter.')],
+    [t('Berhenti', 'Stop'), t('Tekan lagi tombol yang sama, atau Ctrl+. untuk sel itu saja.', 'Press it again, or Ctrl+. to stop just that cell.')],
+    [t('Tumpuk', 'Layer'), t('Sel tidak saling memotong. Jalankan beberapa sekaligus.', 'Cells do not interrupt each other. Run several at once.')],
+    [t('Panik', 'Panic'), t('Tombol Hentikan Semua mematikan semua suara.', 'Stop All Sounds kills everything at once.')],
   ],
-  note: 'Browsers block audio until you interact with the page, so the first Play is what switches the sound on.',
+  note: t('Browser memblokir suara sampai kamu berinteraksi dengan halaman, jadi klik Play yang pertama itulah yang menyalakan suaranya.', 'Browsers block audio until you interact with the page, so the first Play is what switches the sound on.'),
 };
 
 export const CELLS = [
   {
     id: 'demo',
-    nav: 'Demo',
+    nav: t('Contoh', 'Demo'),
     kind: 'showcase',
-    title: 'What Strudel can do',
+    title: t('Apa yang bisa dilakukan Strudel', 'What Strudel can do'),
     objective:
-      'A finished piece, so everyone hears where this is going: layered drums, bass, chords and effects.',
-    tags: ['showcase'],
+      t('Sebuah karya yang sudah jadi, supaya semua orang mendengar tujuan akhirnya: drum, bas, akor, dan efek yang bertumpuk.', 'A finished piece, so everyone hears where this is going: layered drums, bass, chords and effects.'),
+    tags: [t('contoh jadi', 'showcase')],
     code: `setcps(.72)
 let chords = chord("<Ebm9 Bbm7>/4").dict('ireal')
 stack(
@@ -65,77 +67,77 @@ stack(
   },
   {
     id: 'cell-1',
-    nav: 'Rhythm',
+    nav: t('Ritme', 'Rhythm'),
     lesson: 1,
-    title: 'Basic rhythm',
-    objective: 'Build a drum pattern out of sound samples.',
+    title: t('Ritme dasar', 'Basic rhythm'),
+    objective: t('Susun pola drum dari sampel suara.', 'Build a drum pattern out of sound samples.'),
     activities: [
-      'Write a pattern and play it',
-      'Change the order of the sounds',
-      'Add more: <code>cp</code>, <code>oh</code>, <code>mt</code>',
+      t('Tulis sebuah pola lalu mainkan', 'Write a pattern and play it'),
+      t('Ubah urutan suaranya', 'Change the order of the sounds'),
+      t('Tambahkan yang lain: <code>cp</code>, <code>oh</code>, <code>mt</code>', 'Add more: <code>cp</code>, <code>oh</code>, <code>mt</code>'),
     ],
-    tags: ['rhythm', 'samples'],
+    tags: [t('ritme', 'rhythm'), t('sampel', 'samples')],
     hint: 's("bd hh sd hh")',
     info: true,
     code: '',
   },
   {
     id: 'cell-2',
-    nav: 'Repetition',
+    nav: t('Pengulangan', 'Repetition'),
     lesson: 2,
-    title: 'Pattern repetition',
-    objective: 'Use <code>*</code> to subdivide time and repeat sounds.',
+    title: t('Pengulangan pola', 'Pattern repetition'),
+    objective: t('Gunakan <code>*</code> untuk membagi waktu dan mengulang suara.', 'Use <code>*</code> to subdivide time and repeat sounds.'),
     activities: [
-      'Hear how <code>*2</code> and <code>*4</code> differ',
-      'Change the numbers',
-      'Try <code>bd*8</code> or <code>hh*3</code>',
+      t('Dengarkan bedanya <code>*2</code> dan <code>*4</code>', 'Hear how <code>*2</code> and <code>*4</code> differ'),
+      t('Ubah angkanya', 'Change the numbers'),
+      t('Coba <code>bd*8</code> atau <code>hh*3</code>', 'Try <code>bd*8</code> or <code>hh*3</code>'),
     ],
-    tags: ['repetition', 'subdivision'],
+    tags: [t('pengulangan', 'repetition'), t('pembagian ketukan', 'subdivision')],
     hint: 's("bd*2 hh*4 sd hh*2")',
     code: '',
   },
   {
     id: 'cell-3',
-    nav: 'Melody',
+    nav: t('Melodi', 'Melody'),
     lesson: 3,
-    title: 'Melody',
-    objective: 'Turn note names into a tune.',
+    title: t('Melodi', 'Melody'),
+    objective: t('Ubah nama-nama nada menjadi sebuah melodi.', 'Turn note names into a tune.'),
     activities: [
-      'Play a few notes in a row',
-      'Change the letters (<code>c d e f g a b</code>)',
-      'Make the pattern longer',
+      t('Mainkan beberapa nada berurutan', 'Play a few notes in a row'),
+      t('Ganti hurufnya (<code>c d e f g a b</code>)', 'Change the letters (<code>c d e f g a b</code>)'),
+      t('Buat polanya lebih panjang', 'Make the pattern longer'),
     ],
-    tags: ['melody', 'notes'],
+    tags: [t('melodi', 'melody'), t('nada', 'notes')],
     hint: 'note("c e g e a g e c")',
     code: '',
   },
   {
     id: 'cell-4',
-    nav: 'Instruments',
+    nav: t('Instrumen', 'Instruments'),
     lesson: 4,
-    title: 'Instruments & sounds',
-    objective: 'Play the same notes with different voices.',
+    title: t('Instrumen & suara', 'Instruments & sounds'),
+    objective: t('Mainkan nada yang sama dengan suara yang berbeda.', 'Play the same notes with different voices.'),
     activities: [
-      'Start with <code>sawtooth</code>',
-      'Swap in <code>piano</code>, <code>triangle</code>, <code>gm_acoustic_guitar_nylon</code>',
-      'Find a sound you like',
+      t('Mulai dengan <code>sawtooth</code>', 'Start with <code>sawtooth</code>'),
+      t('Ganti dengan <code>piano</code>, <code>triangle</code>, <code>gm_acoustic_guitar_nylon</code>', 'Swap in <code>piano</code>, <code>triangle</code>, <code>gm_acoustic_guitar_nylon</code>'),
+      t('Cari suara yang kamu suka', 'Find a sound you like'),
     ],
-    tags: ['instruments', 'timbre'],
+    tags: [t('instrumen', 'instruments'), t('warna suara', 'timbre')],
     hint: 'note("c e g b").sound("sawtooth")',
     code: '',
   },
   {
     id: 'cell-5',
-    nav: 'Layering',
+    nav: t('Tumpukan', 'Layering'),
     lesson: 5,
-    title: 'Layering',
-    objective: 'Combine patterns with <code>stack()</code>.',
+    title: t('Menumpuk suara', 'Layering'),
+    objective: t('Gabungkan beberapa pola dengan <code>stack()</code>.', 'Combine patterns with <code>stack()</code>.'),
     activities: [
-      'Stack drums and a melody',
-      'Change one layer without touching the other',
-      'Add a third layer',
+      t('Tumpuk drum dengan melodi', 'Stack drums and a melody'),
+      t('Ubah satu lapisan tanpa mengubah lapisan lainnya', 'Change one layer without touching the other'),
+      t('Tambahkan lapisan ketiga', 'Add a third layer'),
     ],
-    tags: ['layering', 'polyphony'],
+    tags: [t('tumpukan', 'layering'), t('polifoni', 'polyphony')],
     hint: `stack(
   s("bd*2 hh*4 sd hh*2"),
   note("c e g e").sound("sawtooth")
@@ -144,16 +146,16 @@ stack(
   },
   {
     id: 'cell-6',
-    nav: 'Effects',
+    nav: t('Efek', 'Effects'),
     lesson: 6,
-    title: 'Effects',
-    objective: 'Shape the sound with reverb, delay and filters.',
+    title: t('Efek', 'Effects'),
+    objective: t('Bentuk suaranya dengan reverb, delay, dan filter.', 'Shape the sound with reverb, delay and filters.'),
     activities: [
-      'Add <code>.room(0.6)</code> and <code>.delay(0.4)</code>',
-      'Push the values further',
-      'Try <code>.lpf(800)</code> or <code>.distort(0.5)</code>',
+      t('Tambahkan <code>.room(0.6)</code> dan <code>.delay(0.4)</code>', 'Add <code>.room(0.6)</code> and <code>.delay(0.4)</code>'),
+      t('Naikkan nilainya lebih jauh', 'Push the values further'),
+      t('Coba <code>.lpf(800)</code> atau <code>.distort(0.5)</code>', 'Try <code>.lpf(800)</code> or <code>.distort(0.5)</code>'),
     ],
-    tags: ['effects', 'mixing'],
+    tags: [t('efek', 'effects'), t('mixing', 'mixing')],
     hint: `note("c e g b a g e c")
   .sound("sawtooth")
   .room(0.6)
@@ -162,11 +164,11 @@ stack(
   },
   {
     id: 'build',
-    nav: 'Build',
+    nav: t('Buat', 'Build'),
     kind: 'free',
-    title: 'Build your own',
-    objective: 'Everything you have learned, in one cell. Make something.',
-    tags: ['free exploration'],
+    title: t('Buat karyamu sendiri', 'Build your own'),
+    objective: t('Semua yang sudah kamu pelajari, dalam satu sel. Buat sesuatu.', 'Everything you have learned, in one cell. Make something.'),
+    tags: [t('eksplorasi bebas', 'free exploration')],
     hint: `// Combine what you learned:
 //   s("bd*2 hh*4")       drums
 //   note("c e g")        melody
@@ -179,15 +181,15 @@ s("bd*2 hh*4")`,
 
 export const WRAP_UP = {
   id: 'wrap-up',
-  title: 'What you learned',
+  title: t('Apa yang sudah kamu pelajari', 'What you learned'),
   items: [
-    'Rhythms from drum samples',
-    'Repetition with <code>*</code>',
-    'Melodies, and swapping instruments',
-    'Layering with <code>stack()</code>',
-    'Effects to shape a sound',
+    t('Ritme dari sampel drum', 'Rhythms from drum samples'),
+    t('Pengulangan dengan <code>*</code>', 'Repetition with <code>*</code>'),
+    t('Melodi, dan mengganti instrumen', 'Melodies, and swapping instruments'),
+    t('Menumpuk dengan <code>stack()</code>', 'Layering with <code>stack()</code>'),
+    t('Efek untuk membentuk suara', 'Effects to shape a sound'),
   ],
 };
 
 /** Sections in the sticky nav, in order. */
-export const NAV = [{ id: 'welcome', nav: 'Start' }, ...CELLS.map((c) => ({ id: c.id, nav: c.nav }))];
+export const NAV = [{ id: 'welcome', nav: t('Mulai', 'Start') }, ...CELLS.map((c) => ({ id: c.id, nav: c.nav }))];
