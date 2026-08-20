@@ -96,6 +96,23 @@ export const ALIAS_MAP = {
   mapFile: 'tidal-drum-machines-alias.json',
 };
 
+/**
+ * Libraries the notebook UI is built on.
+ *
+ * React 18 rather than 19 because 19 dropped the UMD builds, and UMD is what
+ * lets us run React with no bundler and no build step - important when the
+ * workshop machines have neither internet nor node_modules.
+ *
+ * `htm` gives JSX-like syntax through tagged templates, so components read
+ * normally without a compile step. All three are required: unlike hydra, the
+ * page does not render without them.
+ */
+export const UI_LIBS = [
+  { file: 'react.js', url: 'https://unpkg.com/react@18.3.1/umd/react.production.min.js' },
+  { file: 'react-dom.js', url: 'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js' },
+  { file: 'htm.js', url: 'https://unpkg.com/htm@3.1.1/dist/htm.umd.js' },
+];
+
 export const PROFILES = {
   lean: { gmDepth: 0, label: 'lean (~25 MB)' },
   recommended: { gmDepth: 1, label: 'recommended (~110 MB)' },

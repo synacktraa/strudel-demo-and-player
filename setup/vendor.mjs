@@ -22,6 +22,7 @@ import {
   PROFILES,
   DEFAULT_PROFILE,
   banksForProfile,
+  UI_LIBS,
 } from './lib/manifest.mjs';
 import {
   fetchBuffer,
@@ -88,6 +89,29 @@ async function vendorStrudel() {
     `  strudel@${STRUDEL_VERSION}          ${replacements.length} remote URLs redirected, ${uniqueWorklets.length} worklet(s)`,
   );
   return { replacements, worklets: uniqueWorklets };
+}
+
+async function vendorUiLibs() {
+  // React powers the notebook shell, so unlike hydra a failure here is fatal:
+  // better to stop now than to hand someone a blank page at the workshop.
+  const dest = join(VENDOR, 'ui-libs');
+  await mkdir(dest, { recursive: true });
+  let bytes = 0;
+  for (const lib of UI_LIBS) {
+    const target = join(dest, lib.file);
+    if (existsSync(target) && !force) {
+      totals.skipped++;
+      bytes += (await readFile(target)).length;
+      continue;
+    }
+    const buf = await fetchBuffer(lib.url);
+    await writeFile(target, buf);
+    totals.downloaded++;
+    totals.bytes += buf.length;
+    bytes += buf.length;
+  }
+  console.log(`  ui libs                 react, react-dom, htm (${formatBytes(bytes)})`);
+  return UI_LIBS.map((l) => l.file);
 }
 
 async function vendorHydra() {
@@ -206,6 +230,7 @@ async function main() {
   console.log('');
 
   const strudel = await vendorStrudel();
+  const uiLibs = await vendorUiLibs();
   await vendorHydra();
   console.log('');
 
@@ -217,6 +242,7 @@ async function main() {
     profile,
     strudelVersion: STRUDEL_VERSION,
     worklets: strudel.worklets,
+    uiLibs,
     redirectedUrls: strudel.replacements.map((r) => r.remote),
     sampleSets: samples,
     soundfonts,
