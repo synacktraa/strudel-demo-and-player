@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 import { checkVendor, checkPageHasNoRemoteRefs } from '../../setup/lib/verify.mjs';
 
-function makeVendor({ withManifest = true, withStrudel = true, patched = true, withMaps = true } = {}) {
+function makeVendor({ withManifest = true, withStrudel = true, patched = true, withMaps = true, withUiLibs = true } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'vendor-'));
   const vendor = join(root, 'vendor');
   mkdirSync(join(vendor, 'strudel', 'assets'), { recursive: true });
@@ -22,6 +22,7 @@ function makeVendor({ withManifest = true, withStrudel = true, patched = true, w
         profile: 'recommended',
         strudelVersion: '1.3.0',
         worklets: ['clockworker-TEST.js'],
+        uiLibs: ['react.js', 'react-dom.js', 'htm.js'],
         stats: { failures: 0 },
       }),
     );
@@ -52,6 +53,12 @@ function makeVendor({ withManifest = true, withStrudel = true, patched = true, w
     writeFileSync(join(vendor, 'samples', 'maps', 'todepond', 'tidal-drum-machines-alias.json'), '{}');
   }
   writeFileSync(join(vendor, 'soundfonts', '0000_JCLive_sf2_file.js'), 'font');
+  if (withUiLibs) {
+    mkdirSync(join(vendor, 'ui-libs'), { recursive: true });
+    for (const f of ['react.js', 'react-dom.js', 'htm.js']) {
+      writeFileSync(join(vendor, 'ui-libs', f), 'lib');
+    }
+  }
   return vendor;
 }
 
@@ -107,4 +114,13 @@ test('checkPageHasNoRemoteRefs ignores plain informational hyperlinks', () => {
 test('checkPageHasNoRemoteRefs flags a remote stylesheet or image', () => {
   assert.equal(checkPageHasNoRemoteRefs(`<link rel="stylesheet" href="https://cdn.x/a.css">`).ok, false);
   assert.equal(checkPageHasNoRemoteRefs(`<img src="https://cdn.x/a.png">`).ok, false);
+});
+
+test('checkVendor fails when the React UI libraries are missing', async () => {
+  const report = await checkVendor(makeVendor({ withUiLibs: false }));
+  assert.equal(report.ok, false);
+  assert.ok(
+    report.checks.some((c) => !c.ok && /ui librar/i.test(c.name)),
+    'expected a failing UI libraries check',
+  );
 });

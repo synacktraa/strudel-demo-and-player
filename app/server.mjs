@@ -7,7 +7,7 @@
  * fetching are all blocked on file:// URLs.
  */
 import { createServer as createHttpServer } from 'node:http';
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, sep } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -37,6 +37,34 @@ const CONTENT_TYPES = {
   '.map': 'application/json; charset=utf-8',
 };
 
+/**
+ * Where the third-party libraries come from in `--online` mode.
+ *
+ * Deliberately duplicated rather than imported from setup/lib/manifest.mjs:
+ * app/ stays self-contained so the served folder can be copied anywhere. The
+ * copies cannot drift - tests/unit/online-mode.test.mjs asserts they match.
+ *
+ * Only libraries move. Our own files are always served from disk.
+ */
+export const CDN_SOURCES = {
+  'vendor/ui-libs/react.js': 'https://unpkg.com/react@18.3.1/umd/react.production.min.js',
+  'vendor/ui-libs/react-dom.js': 'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js',
+  'vendor/ui-libs/htm.js': 'https://unpkg.com/htm@3.1.1/dist/htm.umd.js',
+  // The unpatched bundle, so its prebake() pulls samples from GitHub. That is
+  // the point of online mode: the sets too large to vendor (VCSL, mridangam)
+  // and helpers like samples('github:...') and shabda() all start working.
+  'vendor/strudel/index.js': 'https://unpkg.com/@strudel/repl@1.3.0',
+};
+
+/** Rewrite a page to load its libraries from the CDN instead of vendor/. */
+export function toOnlineHtml(html) {
+  let out = html;
+  for (const [local, remote] of Object.entries(CDN_SOURCES)) {
+    out = out.split(local).join(remote);
+  }
+  return out;
+}
+
 export function contentTypeFor(filePath) {
   const dot = filePath.lastIndexOf('.');
   const ext = dot === -1 ? '' : filePath.slice(dot).toLowerCase();
@@ -65,7 +93,7 @@ export function resolveSafePath(root, urlPath) {
   return resolved;
 }
 
-export function createServer({ root = PROJECT_ROOT } = {}) {
+export function createServer({ root = PROJECT_ROOT, mode = 'offline' } = {}) {
   return createHttpServer((req, res) => {
     const filePath = resolveSafePath(root, req.url ?? '/');
     if (!filePath) {
@@ -93,6 +121,14 @@ export function createServer({ root = PROJECT_ROOT } = {}) {
       'cache-control': isVendored ? 'public, max-age=31536000, immutable' : 'no-cache',
       'accept-ranges': 'bytes',
     };
+
+    // Online mode swaps the library <script> tags as the page goes out, so the
+    // file on disk stays honestly offline and `npm run verify` keeps passing.
+    if (mode === 'online' && filePath.endsWith('.html')) {
+      const body = Buffer.from(toOnlineHtml(readFileSync(filePath, 'utf8')), 'utf8');
+      res.writeHead(200, { ...headers, 'content-length': body.length, 'cache-control': 'no-cache' });
+      return req.method === 'HEAD' ? res.end() : res.end(body);
+    }
 
     const range = req.headers.range;
     if (range) {
@@ -180,7 +216,12 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv
   const preferred = portArg ? Number(portArg.split('=')[1]) : 8000;
   const shouldOpen = !args.includes('--no-open');
 
-  const missing = findMissingAssets(PROJECT_ROOT);
+  // Offline is the default on purpose. Forgetting a flag should never be the
+  // thing that leaves a classroom without sound - if you want the internet,
+  // you have to say so.
+  const mode = args.includes('--online') ? 'online' : 'offline';
+
+  const missing = mode === 'offline' ? findMissingAssets(PROJECT_ROOT) : [];
   if (missing.length) {
     console.error('');
     console.error('  The offline assets are missing, so the notebook cannot make a sound.');
@@ -191,10 +232,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv
     console.error('');
     console.error('      npm run setup');
     console.error('');
+    console.error('  Or, if you have internet and just want to try it now:');
+    console.error('');
+    console.error('      npm run app:online');
+    console.error('');
     process.exit(1);
   }
 
-  const server = createServer();
+  const server = createServer({ mode });
   const port = await listenOnFreePort(server, '127.0.0.1', preferred);
   const url = `http://localhost:${port}`;
 
@@ -207,7 +252,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv
     console.log(`  (port ${preferred} was busy, using ${port})`);
     console.log('');
   }
-  console.log('  Running fully offline. Press Ctrl+C to stop.');
+  if (mode === 'online') {
+    console.log('  ONLINE MODE - loading Strudel, React and all samples from the internet.');
+    console.log('  Nothing here works without a connection. For the workshop, use:');
+    console.log('');
+    console.log('      npm run app');
+  } else {
+    console.log('  Running fully offline. Press Ctrl+C to stop.');
+  }
   console.log('');
 
   if (shouldOpen) openBrowser(url);

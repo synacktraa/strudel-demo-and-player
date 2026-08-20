@@ -14,7 +14,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { patchStrudelBundle, rewriteSampleMap, collectSampleFiles, pruneBanks } from './lib/rewrite.mjs';
-import { extractSoundRequirements, resolveGmVariants } from './lib/requirements.mjs';
+import {
+  extractSoundRequirements,
+  resolveGmVariants,
+  readNotebookSources,
+} from './lib/requirements.mjs';
 import {
   STRUDEL_VERSION,
   SAMPLE_SETS,
@@ -22,6 +26,7 @@ import {
   PROFILES,
   DEFAULT_PROFILE,
   banksForProfile,
+  UI_LIBS,
 } from './lib/manifest.mjs';
 import {
   fetchBuffer,
@@ -88,6 +93,29 @@ async function vendorStrudel() {
     `  strudel@${STRUDEL_VERSION}          ${replacements.length} remote URLs redirected, ${uniqueWorklets.length} worklet(s)`,
   );
   return { replacements, worklets: uniqueWorklets };
+}
+
+async function vendorUiLibs() {
+  // React powers the notebook shell, so unlike hydra a failure here is fatal:
+  // better to stop now than to hand someone a blank page at the workshop.
+  const dest = join(VENDOR, 'ui-libs');
+  await mkdir(dest, { recursive: true });
+  let bytes = 0;
+  for (const lib of UI_LIBS) {
+    const target = join(dest, lib.file);
+    if (existsSync(target) && !force) {
+      totals.skipped++;
+      bytes += (await readFile(target)).length;
+      continue;
+    }
+    const buf = await fetchBuffer(lib.url);
+    await writeFile(target, buf);
+    totals.downloaded++;
+    totals.bytes += buf.length;
+    bytes += buf.length;
+  }
+  console.log(`  ui libs                 react, react-dom, htm (${formatBytes(bytes)})`);
+  return UI_LIBS.map((l) => l.file);
 }
 
 async function vendorHydra() {
@@ -198,14 +226,15 @@ async function main() {
   }
   await mkdir(VENDOR, { recursive: true });
 
-  const html = await readFile(join(APP, 'index.html'), 'utf8');
-  const { soundfonts: requiredFonts, banks: notebookBanks } = extractSoundRequirements(html);
+  const sources = await readNotebookSources(APP);
+  const { soundfonts: requiredFonts, banks: notebookBanks } = extractSoundRequirements(sources);
   console.log(
     `  Notebook needs ${requiredFonts.size} soundfont instrument(s) and ${notebookBanks.size} named bank(s).`,
   );
   console.log('');
 
   const strudel = await vendorStrudel();
+  const uiLibs = await vendorUiLibs();
   await vendorHydra();
   console.log('');
 
@@ -217,6 +246,7 @@ async function main() {
     profile,
     strudelVersion: STRUDEL_VERSION,
     worklets: strudel.worklets,
+    uiLibs,
     redirectedUrls: strudel.replacements.map((r) => r.remote),
     sampleSets: samples,
     soundfonts,

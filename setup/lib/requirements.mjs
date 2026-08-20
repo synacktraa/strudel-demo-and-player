@@ -47,3 +47,29 @@ export function resolveGmVariants(gm, { defaultDepth = 1, required = new Map() }
   }
   return out;
 }
+
+/**
+ * Read every file the notebook's sound requirements could hide in.
+ *
+ * This used to scan index.html alone, which broke silently the moment the
+ * lesson content moved into app/ui/lessons.js: setup happily vendored zero
+ * soundfonts and the demo cell would have been silent at the workshop. Scanning
+ * the whole UI directory means content can move again without taking the
+ * vendoring with it.
+ */
+export async function readNotebookSources(appDir) {
+  const { readFile, readdir } = await import('node:fs/promises');
+  const { join } = await import('node:path');
+
+  const parts = [await readFile(join(appDir, 'index.html'), 'utf8')];
+  let uiFiles = [];
+  try {
+    uiFiles = (await readdir(join(appDir, 'ui'))).filter((f) => f.endsWith('.js'));
+  } catch {
+    // No ui/ directory - plain-HTML notebook, index.html is the whole story.
+  }
+  for (const file of uiFiles) {
+    parts.push(await readFile(join(appDir, 'ui', file), 'utf8'));
+  }
+  return parts.join('\n');
+}

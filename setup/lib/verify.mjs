@@ -85,7 +85,23 @@ export async function checkVendor(vendorDir) {
     missingWorklets.length ? `missing ${missingWorklets.join(', ')}` : `${worklets.length} present`,
   );
 
-  // 5. Every map prebake() asks for.
+  // 5. React and htm - the shell does not render without them.
+  const uiLibs = manifest.uiLibs ?? [];
+  const missingLibs = [];
+  for (const name of uiLibs) {
+    if ((await fileSize(join(vendorDir, 'ui-libs', name))) <= 0) missingLibs.push(name);
+  }
+  add(
+    'ui libraries',
+    uiLibs.length > 0 && missingLibs.length === 0,
+    uiLibs.length === 0
+      ? 'manifest lists none - re-run `npm run setup`'
+      : missingLibs.length
+        ? `missing ${missingLibs.join(', ')}`
+        : uiLibs.join(', '),
+  );
+
+  // 6. Every map prebake() asks for.
   const missingMaps = [];
   for (const [dir, file] of REQUIRED_MAPS) {
     if ((await fileSize(join(vendorDir, 'samples', 'maps', dir, file))) <= 0) missingMaps.push(`${dir}/${file}`);
@@ -96,15 +112,15 @@ export async function checkVendor(vendorDir) {
     missingMaps.length ? `missing ${missingMaps.join(', ')}` : `${REQUIRED_MAPS.length} present`,
   );
 
-  // 6. Audio actually on disk, and reachable from each map's _base.
+  // 7. Audio actually on disk, and reachable from each map's _base.
   const audioReport = await checkAudioPresence(vendorDir);
   add('sample audio', audioReport.ok, audioReport.detail);
 
-  // 7. Soundfonts.
+  // 8. Soundfonts.
   const fontCount = await countFiles(join(vendorDir, 'soundfonts'));
   add('soundfonts', fontCount > 0, `${fontCount} GM font file(s)`);
 
-  // 8. Anything that failed during the last vendoring run.
+  // 9. Anything that failed during the last vendoring run.
   const failures = manifest.stats?.failures ?? 0;
   add('last setup run', failures === 0, failures ? `${failures} download(s) failed - re-run \`npm run setup\`` : 'clean');
 

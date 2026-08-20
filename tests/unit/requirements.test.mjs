@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-import { extractSoundRequirements, resolveGmVariants } from '../../setup/lib/requirements.mjs';
+import {
+  extractSoundRequirements,
+  resolveGmVariants,
+  readNotebookSources,
+} from '../../setup/lib/requirements.mjs';
 
 test('extractSoundRequirements finds soundfont names used in the notebook', () => {
   const html = `<strudel-editor><!-- note("c e g").s("gm_acoustic_bass") --></strudel-editor>`;
@@ -34,9 +39,10 @@ test('extractSoundRequirements only reads code cells, not prose', () => {
   assert.ok(!req.banks.has('crate'));
 });
 
-test('the shipped notebook resolves to a non-empty requirement set', () => {
-  const html = readFileSync(new URL('../../app/index.html', import.meta.url), 'utf8');
-  const req = extractSoundRequirements(html);
+test('the shipped notebook resolves to a non-empty requirement set', async () => {
+  // Scans index.html *and* app/ui - the content has moved between them before.
+  const sources = await readNotebookSources(fileURLToPath(new URL('../../app', import.meta.url)));
+  const req = extractSoundRequirements(sources);
   assert.ok(req.soundfonts.has('gm_epiano1'), 'demo cell uses gm_epiano1');
   assert.equal(req.soundfonts.get('gm_epiano1'), 2, 'demo cell uses gm_epiano1:1 => needs 2 variants');
   assert.ok(req.soundfonts.has('gm_acoustic_bass'), 'demo cell uses gm_acoustic_bass');

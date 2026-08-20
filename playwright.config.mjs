@@ -8,6 +8,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  // online.spec.mjs needs the internet, which is the one thing this project
+  // assumes it will not have. It runs from playwright.online.config.mjs
+  // instead, so the default suite stays green with the cable pulled.
+  testIgnore: ['**/online.spec.mjs'],
   timeout: 90_000,
   expect: { timeout: 20_000 },
   fullyParallel: false,

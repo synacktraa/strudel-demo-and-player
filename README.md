@@ -37,6 +37,31 @@ prints the URL too, and picks another port automatically if 8000 is taken.
 
 That's the whole workflow.
 
+### Offline is the default, deliberately
+
+There is also an online mode:
+
+```bash
+npm run app:online
+```
+
+It loads Strudel, React and every sample from the CDN, needs no `npm run setup`, and
+unlocks the sets too large to vendor — the full VCSL orchestral library, mridangam, and
+helpers like `samples('github:...')` and `shabda(...)`. Useful for developing on a machine
+that hasn't run setup, or for trying something the vendored library doesn't cover.
+
+**Offline stays the default because the failure modes are not symmetric.** Defaulting to
+offline on a machine that happens to have internet costs nothing — it just uses local files.
+Defaulting to online on a machine that doesn't costs you the workshop. A flag you have to
+remember is a flag that gets forgotten exactly once, at the worst possible moment.
+
+For the same reason there is **no automatic fallback** from offline to CDN. A machine with
+half-finished assets would look fine during prep on your wifi and die in the classroom.
+`npm run app` refuses to start and tells you to run setup instead.
+
+Only the third-party libraries move in online mode; `ui/` and `styles.css` are always
+served from disk, so what you develop is what ships.
+
 ---
 
 ## Checking a machine is ready
@@ -74,12 +99,19 @@ needs Node.js installed.
 ## Layout
 
 ```
-app/          everything that gets served — runs offline
-  index.html  the notebook
-  app.js      cell controls, keyboard shortcuts
+app/                  everything that gets served — runs offline
+  index.html          shell: one <div id="root"> and the local script tags
   styles.css
-  server.mjs  static server, Node builtins only
-  vendor/     downloaded assets (gitignored — a build output, not source)
+  server.mjs          static server, Node builtins only
+  ui/                 the React app (no build step — see below)
+    main.js           mounts <Notebook> into #root
+    Notebook.js       header, nav, sections, panic button
+    StrudelCell.js    one cell + the imperatively mounted <strudel-editor>
+    Equalizer.js      canvas visualiser driven by the master audio tap
+    useMasterAnalyser.js
+    lessons.js        all lesson content, as data
+    Icon.js  runtime.js
+  vendor/             downloaded assets (gitignored — a build output, not source)
 
 setup/        everything that needs internet — never runs at the workshop
   index.mjs   entry point for `npm run setup`
@@ -154,7 +186,9 @@ npm run setup -- --profile=generous
 the class. Only the demo cell at the top is pre-filled, as a "here's where this goes"
 showcase.
 
-A cheat sheet for what to type into each, if you want one on the podium:
+Each cell has a **Hint** button showing the pattern below, so you don't have to remember
+them. They are the same strings listed here — `tests/unit/hints.test.mjs` fails if the two
+drift apart.
 
 **1 · Rhythm**
 
@@ -219,6 +253,26 @@ what's present, or re-run setup with `--profile=generous`.
 
 ---
 
+## The UI
+
+The notebook is a React app with **no build step**. React, ReactDOM and htm are vendored as
+UMD bundles into `app/vendor/ui-libs/` and loaded as plain script tags; `htm` provides
+JSX-like syntax through tagged templates, so components read normally without a compiler.
+That matters because the workshop machines have no internet and no `node_modules` — there
+is nothing to install and nothing to compile, the browser just runs the files.
+
+React 18 rather than 19, because 19 dropped the UMD builds.
+
+One deliberate exception to React owning the DOM: `<strudel-editor>` is created imperatively
+and mounted exactly once per cell. It holds a scheduler, a prebaked sample registry and an
+AudioWorklet, and it inserts its own CodeMirror container as a sibling of itself — so a
+React remount would cut the audio and re-run a multi-second prebake. Each editor lives in a
+host `<div>` that React renders empty and never reconciles into.
+
+The header equalizer reads Strudel's master output (superdough's `destinationGain`) through
+an `AnalyserNode`, so it responds to every cell without students adding `.analyze()` to
+their own patterns.
+
 ## How it works
 
 `setup/vendor.mjs` reads `app/index.html` to find which soundfonts and banks the lessons
@@ -233,6 +287,7 @@ its URLs fails loudly at setup rather than silently phoning home at the workshop
 npm test          # unit tests, no dependencies, ~1s
 npm run test:e2e  # Playwright: loads the page with the internet blocked
 npm run test:all
+npm run test:online  # opt-in, needs internet: checks --online mode still works
 ```
 
 The E2E suite hard-aborts every non-localhost request, so a regression that reintroduces a
