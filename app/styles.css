@@ -41,9 +41,18 @@ body {
   transition: padding 300ms var(--ease-out);
 }
 
-#header.scrolled .title-section,
-#header.scrolled .controls {
+#header.scrolled .title-section {
   display: none;
+}
+
+/*
+  Keep the panic button reachable. It used to be hidden along with the title
+  once the header shrank on scroll - which is precisely when a room full of
+  students has everything playing at once. Shrink it instead of removing it.
+*/
+#header.scrolled .stop-all-btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
 }
 
 .header-content {
@@ -539,4 +548,33 @@ strudel-editor {
   .modal-content {
     animation: none;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Inline SVG icons
+
+   These replace the Font Awesome CDN kit. The sprite lives at the top of
+   index.html; buttons reference it with <use href="#icon-name">. currentColor
+   keeps every icon in step with its button's text colour.
+   --------------------------------------------------------------------------- */
+
+.icon-sprite {
+  display: none;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+.play-btn,
+.stop-all-btn,
+.info-btn,
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
 }

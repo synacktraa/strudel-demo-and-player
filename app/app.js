@@ -2,6 +2,10 @@ const initialCode = new Map();
 let focusedEditor = null;
 const playingStates = new Map();
 
+// Icons come from the inline <svg> sprite in index.html - no icon CDN, so the
+// notebook renders identically with the network disconnected.
+const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+
 function getEditorForButton(btn) {
   const cellId = btn.getAttribute('data-cell');
   const cell = btn.closest('.cell');
@@ -15,7 +19,7 @@ function updateButtonState(btn, cellId, isPlaying) {
   console.log('updateButtonState called:', cellId, isPlaying);
 
   if (isPlaying) {
-    btn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    btn.innerHTML = icon('pause') + ' Pause';
     btn.classList.add('playing');
     playingStates.set(cellId, true);
 
@@ -28,7 +32,7 @@ function updateButtonState(btn, cellId, isPlaying) {
       easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
     });
   } else {
-    btn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+    btn.innerHTML = icon('play') + ' Play';
     btn.classList.remove('playing');
     playingStates.set(cellId, false);
   }
@@ -42,23 +46,27 @@ function initCellControls() {
     playingStates.set(cellId, false);
 
     if (editor) {
-      const checkEditorReady = setInterval(() => {
-        if (editor.editor && editor.editor.scheduler) {
-          clearInterval(checkEditorReady);
+      // The <strudel-editor> component fires `update` on every REPL state
+      // change, carrying the real started/stopped flag. Driving the button from
+      // that keeps it honest even when a pattern stops without a click.
+      editor.addEventListener('update', (event) => {
+        const started = !!(event.detail && event.detail.started);
+        if (playingStates.get(cellId) !== started) {
+          updateButtonState(btn, cellId, started);
+        }
+      });
 
-          editor.editor.scheduler.on('started', () => {
-            console.log('Scheduler started event for cell:', cellId);
-            updateButtonState(btn, cellId, true);
-          });
-
-          editor.editor.scheduler.on('stopped', () => {
-            console.log('Scheduler stopped event for cell:', cellId);
-            updateButtonState(btn, cellId, false);
-          });
+      // The component defaults to solo, where starting one cell stops every
+      // other one - but this notebook tells students they can play several at
+      // once to layer sounds. Turn solo off as soon as the editor exists.
+      const waitForEditor = setInterval(() => {
+        if (editor.editor) {
+          clearInterval(waitForEditor);
+          editor.editor.solo = false;
         }
       }, 100);
 
-      setTimeout(() => clearInterval(checkEditorReady), 5000);
+      setTimeout(() => clearInterval(waitForEditor), 10000);
     }
 
     btn.addEventListener('click', () => {
@@ -99,7 +107,7 @@ function stopAllSounds() {
 }
 
 function setupKeyboardShortcuts() {
-  setTimeout(() => {
+  {
     document.querySelectorAll('strudel-editor').forEach(editor => {
       console.log('Setting up keyboard shortcuts for editor');
 
@@ -170,7 +178,7 @@ function setupKeyboardShortcuts() {
         }
       }, true);
     });
-  }, 2000);
+  }
 }
 
 function setupScrollBehavior() {
@@ -307,9 +315,22 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 );
 
-setTimeout(() => {
+// Wire the UI as soon as the markup exists rather than after an arbitrary delay.
+// None of these need the Strudel editors to have finished booting - the click
+// and keyboard handlers check for `editor.editor` when they actually fire - and
+// waiting a second left a dead zone where pressing Play did nothing.
+function initNotebook() {
   initCellControls();
   setupKeyboardShortcuts();
   setupScrollBehavior();
   setupInfoModal();
-}, 1000);
+
+  // Lets the E2E suite wait for a real signal instead of sleeping.
+  document.body.dataset.notebookReady = 'true';
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNotebook);
+} else {
+  initNotebook();
+}
