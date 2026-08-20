@@ -6,10 +6,16 @@ accounts, no CDN.
 
 ---
 
-## Prerequisite
+## Prerequisites
 
-**Install [Node.js](https://nodejs.org) 18 or newer before you start.** It's the only thing
-you need; everything below runs on Node builtins with no other dependencies.
+1. **Install [Node.js](https://nodejs.org) 18 or newer.** It's the only runtime you need —
+   everything below runs on Node builtins with no other dependencies.
+2. **Install [Git](https://git-scm.com/downloads)** and clone this repository:
+
+   ```bash
+   git clone https://github.com/synacktraa/strudel-demo-and-player.git
+   cd strudel-demo-and-player
+   ```
 
 ## The two commands
 
