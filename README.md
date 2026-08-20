@@ -37,6 +37,31 @@ prints the URL too, and picks another port automatically if 8000 is taken.
 
 That's the whole workflow.
 
+### Offline is the default, deliberately
+
+There is also an online mode:
+
+```bash
+npm run app:online
+```
+
+It loads Strudel, React and every sample from the CDN, needs no `npm run setup`, and
+unlocks the sets too large to vendor — the full VCSL orchestral library, mridangam, and
+helpers like `samples('github:...')` and `shabda(...)`. Useful for developing on a machine
+that hasn't run setup, or for trying something the vendored library doesn't cover.
+
+**Offline stays the default because the failure modes are not symmetric.** Defaulting to
+offline on a machine that happens to have internet costs nothing — it just uses local files.
+Defaulting to online on a machine that doesn't costs you the workshop. A flag you have to
+remember is a flag that gets forgotten exactly once, at the worst possible moment.
+
+For the same reason there is **no automatic fallback** from offline to CDN. A machine with
+half-finished assets would look fine during prep on your wifi and die in the classroom.
+`npm run app` refuses to start and tells you to run setup instead.
+
+Only the third-party libraries move in online mode; `ui/` and `styles.css` are always
+served from disk, so what you develop is what ships.
+
 ---
 
 ## Checking a machine is ready
@@ -262,6 +287,7 @@ its URLs fails loudly at setup rather than silently phoning home at the workshop
 npm test          # unit tests, no dependencies, ~1s
 npm run test:e2e  # Playwright: loads the page with the internet blocked
 npm run test:all
+npm run test:online  # opt-in, needs internet: checks --online mode still works
 ```
 
 The E2E suite hard-aborts every non-localhost request, so a regression that reintroduces a
