@@ -21,10 +21,10 @@ export const HERO = {
 export const HOW_TO = {
   title: t('Cara memainkannya', 'How to play'),
   items: [
-    [t('Putar', 'Play'), t('Setiap sel punya tombol Play sendiri - atau tekan Ctrl+Enter saat sedang mengetik di dalamnya.', 'Each cell has its own Play button - or press Ctrl+Enter while editing it.')],
-    [t('Berhenti', 'Stop'), t('Tekan tombol yang sama lagi, atau Ctrl+. untuk menghentikan sel itu saja.', 'Press the same button again, or Ctrl+. to stop just that cell.')],
-    [t('Tumpuk', 'Layer'), t('Sel tidak saling memotong. Jalankan beberapa sekaligus dan suaranya akan bertumpuk.', 'Cells do not interrupt each other. Run several at once and they stack.')],
-    [t('Panik', 'Panic'), t('Tombol Hentikan Semua di bagian atas mematikan semua suara sekaligus.', 'Stop All Sounds in the header kills everything at once.')],
+    [t('Putar', 'Play'), t('Tiap sel punya tombol Play sendiri, atau tekan Ctrl+Enter.', 'Each cell has its own Play button, or press Ctrl+Enter.')],
+    [t('Berhenti', 'Stop'), t('Tekan lagi tombol yang sama, atau Ctrl+. untuk sel itu saja.', 'Press it again, or Ctrl+. to stop just that cell.')],
+    [t('Tumpuk', 'Layer'), t('Sel tidak saling memotong. Jalankan beberapa sekaligus.', 'Cells do not interrupt each other. Run several at once.')],
+    [t('Panik', 'Panic'), t('Tombol Hentikan Semua mematikan semua suara.', 'Stop All Sounds kills everything at once.')],
   ],
   note: t('Browser memblokir suara sampai kamu berinteraksi dengan halaman, jadi klik Play yang pertama itulah yang menyalakan suaranya.', 'Browsers block audio until you interact with the page, so the first Play is what switches the sound on.'),
 };
