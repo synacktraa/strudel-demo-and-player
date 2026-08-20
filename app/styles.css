@@ -840,6 +840,28 @@ h3 .bi__en {
   display: none;
 }
 
+/* With the Indonesian hidden, the English is no longer a gloss on something
+   above it - it is the content. Drop the secondary treatment so EN-only reads
+   like a normal page instead of a page of footnotes. (ID-only needs no
+   equivalent: .bi__id is already styled as the primary line.) */
+:root[data-lang='en'] .bi__en {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  font-style: normal;
+  opacity: 1;
+}
+
+:root[data-lang='en'] h1 .bi__en,
+:root[data-lang='en'] h2 .bi__en,
+:root[data-lang='en'] h3 .bi__en {
+  font-weight: inherit;
+  letter-spacing: inherit;
+  /* unset, not a colour: the hero heading paints itself with a clipped
+     gradient, which only shows through while the fill stays transparent. */
+  -webkit-text-fill-color: unset;
+}
+
 /* --------------------------------------------------------- language toggle */
 
 .lang-toggle {
