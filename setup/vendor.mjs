@@ -14,7 +14,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { patchStrudelBundle, rewriteSampleMap, collectSampleFiles, pruneBanks } from './lib/rewrite.mjs';
-import { extractSoundRequirements, resolveGmVariants } from './lib/requirements.mjs';
+import {
+  extractSoundRequirements,
+  resolveGmVariants,
+  readNotebookSources,
+} from './lib/requirements.mjs';
 import {
   STRUDEL_VERSION,
   SAMPLE_SETS,
@@ -222,8 +226,8 @@ async function main() {
   }
   await mkdir(VENDOR, { recursive: true });
 
-  const html = await readFile(join(APP, 'index.html'), 'utf8');
-  const { soundfonts: requiredFonts, banks: notebookBanks } = extractSoundRequirements(html);
+  const sources = await readNotebookSources(APP);
+  const { soundfonts: requiredFonts, banks: notebookBanks } = extractSoundRequirements(sources);
   console.log(
     `  Notebook needs ${requiredFonts.size} soundfont instrument(s) and ${notebookBanks.size} named bank(s).`,
   );
