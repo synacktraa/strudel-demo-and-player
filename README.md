@@ -74,12 +74,19 @@ needs Node.js installed.
 ## Layout
 
 ```
-app/          everything that gets served — runs offline
-  index.html  the notebook
-  app.js      cell controls, keyboard shortcuts
+app/                  everything that gets served — runs offline
+  index.html          shell: one <div id="root"> and the local script tags
   styles.css
-  server.mjs  static server, Node builtins only
-  vendor/     downloaded assets (gitignored — a build output, not source)
+  server.mjs          static server, Node builtins only
+  ui/                 the React app (no build step — see below)
+    main.js           mounts <Notebook> into #root
+    Notebook.js       header, nav, sections, panic button
+    StrudelCell.js    one cell + the imperatively mounted <strudel-editor>
+    Equalizer.js      canvas visualiser driven by the master audio tap
+    useMasterAnalyser.js
+    lessons.js        all lesson content, as data
+    Icon.js  runtime.js
+  vendor/             downloaded assets (gitignored — a build output, not source)
 
 setup/        everything that needs internet — never runs at the workshop
   index.mjs   entry point for `npm run setup`
@@ -220,6 +227,26 @@ what's present, or re-run setup with `--profile=generous`.
 **Want a specific port** — `node app/server.mjs --port=9000`.
 
 ---
+
+## The UI
+
+The notebook is a React app with **no build step**. React, ReactDOM and htm are vendored as
+UMD bundles into `app/vendor/ui-libs/` and loaded as plain script tags; `htm` provides
+JSX-like syntax through tagged templates, so components read normally without a compiler.
+That matters because the workshop machines have no internet and no `node_modules` — there
+is nothing to install and nothing to compile, the browser just runs the files.
+
+React 18 rather than 19, because 19 dropped the UMD builds.
+
+One deliberate exception to React owning the DOM: `<strudel-editor>` is created imperatively
+and mounted exactly once per cell. It holds a scheduler, a prebaked sample registry and an
+AudioWorklet, and it inserts its own CodeMirror container as a sibling of itself — so a
+React remount would cut the audio and re-run a multi-second prebake. Each editor lives in a
+host `<div>` that React renders empty and never reconciles into.
+
+The header equalizer reads Strudel's master output (superdough's `destinationGain`) through
+an `AnalyserNode`, so it responds to every cell without students adding `.analyze()` to
+their own patterns.
 
 ## How it works
 
