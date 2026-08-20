@@ -174,6 +174,33 @@ npm run setup -- --profile=generous
 
 ---
 
+## Language
+
+The notebook is **bilingual: Indonesian and English shown together**, Indonesian leading and
+English beneath it in smaller type.
+
+Not a language switcher, deliberately. The students read Indonesian and the teaching team
+does not; the teachers read English and the students may not. A switcher means whoever is
+not holding the mouse cannot read the screen — including a teacher leaning over a student's
+shoulder to help. Showing both costs a little vertical space and solves that outright.
+
+The **ID + EN / ID / EN** control in the header narrows the display when you want it (handy
+on a projector). It is remembered per machine, and defaults to showing both.
+
+> ⚠️ **The Indonesian has not been checked by a native speaker.** It was written by whoever
+> generated this code, not by anyone on the teaching team. **Please have a local reviewer
+> read it before teaching from it** — a mistranslated instruction is worse than none.
+>
+> Everything is in two files, each string beside its English pair:
+> - `app/ui/lessons.js` — all lesson content
+> - `app/ui/text.js` — buttons, tooltips, the header tagline
+>
+> The format is `t('Indonesian', 'English')`. Edit the first string only.
+> `npm test` fails if any string is missing a language, or if the code samples inside a
+> lesson differ between the two.
+
+---
+
 ## Using it in the workshop
 
 - Project the page and walk through the cells in order.

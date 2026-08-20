@@ -122,7 +122,9 @@ code {
 .header__title p {
   font-size: 0.86rem;
   color: var(--text-dim);
-  max-height: 2rem;
+  /* Room for both languages stacked - this collapses to 0 when scrolled, so it
+     is a ceiling for the animation, not a fixed height. */
+  max-height: 3.4rem;
   opacity: 1;
   overflow: hidden;
   transition: max-height var(--slow) var(--ease), opacity var(--fast) var(--ease);
@@ -773,5 +775,106 @@ main {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* --------------------------------------------------------------- bilingual */
+
+/* Indonesian leads, English follows in smaller, dimmer type. Both are always
+   in the DOM; the mode on <html> only hides one, so switching is free and
+   assistive tech still reaches both. */
+.bi {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.12em;
+  vertical-align: top;
+}
+
+.bi__id {
+  display: block;
+}
+
+.bi__en {
+  display: block;
+  font-size: 0.82em;
+  line-height: 1.4;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+/* Inside a heading the English should not inherit the heading's weight, or it
+   competes with the Indonesian it is meant to support. */
+h1 .bi__en,
+h2 .bi__en,
+h3 .bi__en {
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0;
+  -webkit-text-fill-color: var(--text-faint);
+}
+
+/* Controls stay on one line each, just tighter. */
+.play-btn .bi,
+.stop-all-btn .bi,
+.ghost-btn .bi,
+.insert-btn .bi,
+.tag .bi,
+.toc .bi {
+  gap: 0;
+  text-align: left;
+}
+
+.play-btn .bi__en,
+.stop-all-btn .bi__en,
+.ghost-btn .bi__en,
+.insert-btn .bi__en,
+.tag .bi__en,
+.toc .bi__en {
+  font-size: 0.7em;
+  font-style: normal;
+  opacity: 0.72;
+}
+
+:root[data-lang='id'] .bi__en,
+:root[data-lang='en'] .bi__id {
+  display: none;
+}
+
+/* --------------------------------------------------------- language toggle */
+
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.lang-toggle button {
+  padding: 0.32rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+
+.lang-toggle button:last-child {
+  border-right: none;
+}
+
+.lang-toggle button.is-active {
+  color: var(--bg);
+  background: var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lang-toggle button:not(.is-active):hover {
+    color: var(--text);
+    background: var(--bg-lift);
   }
 }
