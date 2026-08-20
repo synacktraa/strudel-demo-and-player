@@ -518,13 +518,18 @@ main {
 }
 
 .cell__hint {
+  position: relative;
   margin-bottom: 0.8rem;
-  padding: 0.7rem 0.9rem;
   background: var(--bg-inset);
   border: 1px dashed rgba(195, 232, 141, 0.4);
   border-radius: var(--radius-sm);
-  overflow-x: auto;
   animation: hint-in var(--fast) var(--ease) both;
+}
+
+.cell__hint pre {
+  /* Right padding clears the copy button so long hints never slide under it. */
+  padding: 0.7rem 6.5rem 0.7rem 0.9rem;
+  overflow-x: auto;
 }
 
 .cell__hint code {
@@ -532,6 +537,47 @@ main {
   border: none;
   padding: 0;
   font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.3rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 550;
+  color: var(--text-dim);
+  background: var(--bg-raised);
+  border: 1px solid var(--line-bright);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    background-color var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .copy-btn:hover {
+    color: var(--text);
+    border-color: var(--text-faint);
+  }
+}
+
+.copy-btn:active {
+  transform: scale(0.94);
+}
+
+.copy-btn.is-copied {
+  color: var(--accent);
+  border-color: rgba(195, 232, 141, 0.5);
+  background: var(--accent-soft);
 }
 
 @keyframes hint-in {

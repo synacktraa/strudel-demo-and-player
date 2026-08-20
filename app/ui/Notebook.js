@@ -116,7 +116,7 @@ export function Notebook() {
         <div class="header__top">
           <div class="header__title">
             <h1>Strudel Workshop</h1>
-            <p>Live-coding music, running entirely on this machine</p>
+            <p>Write code. Hear it immediately.</p>
           </div>
           <div class="header__right">
             <${Equalizer} analyser=${analyser} active=${anyPlaying} />

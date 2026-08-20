@@ -13,6 +13,7 @@
  */
 import { html, useRef, useEffect, useState, useCallback } from './runtime.js';
 import { Icon } from './Icon.js';
+import { CopyButton } from './CopyButton.js';
 
 /** Poll rather than await: the component assigns `.editor` after a setTimeout. */
 const EDITOR_POLL_MS = 100;
@@ -161,7 +162,12 @@ export function StrudelCell({ cell, onRegister, onInfo }) {
         : null}
 
       ${showHint && cell.hint
-        ? html`<pre class="cell__hint"><code>${cell.hint}</code></pre>`
+        ? html`
+            <div class="cell__hint">
+              <pre><code>${cell.hint}</code></pre>
+              <${CopyButton} text=${cell.hint} />
+            </div>
+          `
         : null}
 
       <div class="cell__editor" ref=${hostRef}></div>

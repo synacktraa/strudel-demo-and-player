@@ -11,9 +11,10 @@
   <div id="root"></div>
 
   <!--
-    Everything below is local. `npm run setup` downloads these into app/vendor/
-    and rewrites Strudel's internal URLs to point there, so the page makes no
-    network requests at all. See README, "What offline actually means here".
+    `npm run setup` downloads these into app/vendor/ and rewrites Strudel's
+    internal URLs to point there, so this page as written makes no network
+    requests at all. `npm run app:online` swaps these four tags for CDN URLs
+    as the page is served; the file on disk stays offline either way.
   -->
   <script src="vendor/ui-libs/react.js"></script>
   <script src="vendor/ui-libs/react-dom.js"></script>

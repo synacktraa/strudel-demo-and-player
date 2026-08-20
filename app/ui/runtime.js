@@ -9,9 +9,9 @@
 const { React, ReactDOM, htm } = window;
 
 if (!React || !ReactDOM || !htm) {
-  throw new Error(
-    'UI libraries missing. Run `npm run setup` to download React into app/vendor/ui-libs.',
-  );
+  // Says what is missing, not where it should have come from: in online mode
+  // these arrive from the CDN, so "run setup" would be the wrong advice.
+  throw new Error('The UI libraries (React, ReactDOM, htm) did not load.');
 }
 
 export const html = htm.bind(React.createElement);

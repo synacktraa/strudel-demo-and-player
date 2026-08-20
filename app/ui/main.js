@@ -18,7 +18,7 @@ try {
     <div class="fatal">
       <h1>The notebook could not start</h1>
       <p>${String(err && err.message ? err.message : err)}</p>
-      <p>Run <code>npm run verify</code> to check this machine's offline assets.</p>
+      <p>Run <code>npm run verify</code> to check the setup.</p>
     </div>
   `;
   throw err;

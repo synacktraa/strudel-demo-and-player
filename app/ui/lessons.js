@@ -22,7 +22,7 @@ export const INTRO = [
     title: 'What is Strudel?',
     body: [
       'Strudel is a live-coding environment for making patterns and music in the browser, built on the TidalCycles pattern language.',
-      'Everything here runs on this machine. No internet needed.',
+      'A pattern loops forever until you stop it. Change the code, press play again, and it changes with you.',
     ],
   },
 ];

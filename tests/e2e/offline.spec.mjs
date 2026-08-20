@@ -218,3 +218,30 @@ test('the equalizer reacts to what is playing', async ({ page }) => {
 
   await expect(page.locator('.equalizer')).toHaveClass(/is-active/);
 });
+
+test('the hint panel copies its pattern to the clipboard', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await blockTheInternet(page);
+  await page.goto('/');
+  await waitForEditors(page);
+
+  // Cell 5's hint is multi-line - the case most likely to be mangled.
+  const cell = page.locator('#cell-5');
+  await expect(cell.locator('.cell__hint')).toHaveCount(0);
+
+  await cell.getByRole('button', { name: /hint/i }).click();
+  const hint = await cell.locator('.cell__hint pre code').innerText();
+  expect(hint).toContain('stack(');
+  expect(hint.split('\n').length).toBeGreaterThan(1);
+
+  await cell.locator('.copy-btn').click();
+  await expect(cell.locator('.copy-btn')).toHaveText(/Copied/);
+
+  // Windows normalises clipboard newlines to CRLF, which is correct platform
+  // behaviour and pastes fine - so compare on content, not line endings.
+  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboard.replace(/\r\n/g, '\n').trim()).toBe(hint.trim());
+
+  // Feedback reverts so the button is reusable.
+  await expect(cell.locator('.copy-btn')).toHaveText(/Copy/, { timeout: 5000 });
+});
